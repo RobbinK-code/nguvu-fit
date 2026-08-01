@@ -1,0 +1,63 @@
+.hero {
+  padding: 96px 24px 64px;
+}
+
+.hero-eyebrow {
+  color: var(--gold);
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  color: var(--paper);
+}
+
+.hero-sub {
+  max-width: 520px;
+  margin: 28px 0 36px;
+  color: var(--paper-dim);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  padding: 40px 24px 100px;
+  border-top: 1px solid var(--line);
+}
+
+.step-index {
+  display: block;
+  color: var(--sunrise);
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.step h3 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: none;
+  margin-bottom: 8px;
+}
+
+.step p {
+  color: var(--paper-dim);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}

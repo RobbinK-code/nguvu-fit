@@ -1,0 +1,40 @@
+.history {
+  padding: 40px 24px 100px;
+}
+
+.empty-state {
+  color: var(--paper-dim);
+  padding: 40px 0;
+}
+
+.log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+}
+
+.log-name {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.log-date {
+  margin: 0;
+  color: var(--paper-dim);
+  font-size: 0.78rem;
+}
+
+.log-duration {
+  color: var(--gold);
+  font-size: 0.85rem;
+}

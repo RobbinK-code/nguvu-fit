@@ -1,0 +1,52 @@
+.subscribe {
+  padding: 56px 24px 100px;
+  max-width: 900px;
+}
+
+.subscribe h2 {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  margin-bottom: 32px;
+}
+
+.subscribe-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.perks-title {
+  font-family: var(--font-body);
+  text-transform: none;
+  font-size: 1.05rem;
+  margin-bottom: 16px;
+}
+
+.perks-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--paper-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  line-height: 1.5;
+}
+
+.plan-price {
+  margin-top: 12px;
+  color: var(--gold);
+  font-size: 0.9rem;
+}
+
+.subscribe-active {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  max-width: 420px;
+}
+
+@media (max-width: 720px) {
+  .subscribe-grid {
+    grid-template-columns: 1fr;
+  }
+}
