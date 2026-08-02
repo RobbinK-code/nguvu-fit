@@ -3,6 +3,7 @@ services:
     name: nguvu-fit-api
     env: python
     plan: free
+    rootDir: backend
     buildCommand: "pip install -r requirements.txt && flask db upgrade && python seed.py"
     startCommand: "gunicorn app:app"
     envVars:
