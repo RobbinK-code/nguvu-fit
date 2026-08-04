@@ -1,0 +1,32 @@
+.phone-input {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-input-country select {
+  height: 100%;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 10px 8px;
+  font-size: 0.95rem;
+  min-width: 92px;
+}
+
+.phone-input-local {
+  flex: 1;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 10px 12px;
+}
+
+.phone-input-local:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.phone-input-local:focus,
+.phone-input-country select:focus {
+  border-color: var(--gold);
+}
