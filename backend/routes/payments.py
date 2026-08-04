@@ -42,6 +42,10 @@ def subscribe(user):
         )
     except mpesa.MpesaConfigError as err:
         return jsonify({"error": str(err)}), 501
+    except mpesa.MpesaAPIError as err:
+        payment.status = "failed"
+        db.session.commit()
+        return jsonify({"error": str(err)}), 502
     except Exception as err:
         payment.status = "failed"
         db.session.commit()
