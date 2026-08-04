@@ -35,6 +35,11 @@ class MpesaConfigError(Exception):
     pass
 
 
+class MpesaAPIError(Exception):
+    """Raised when Safaricom's API itself rejects the request - carries
+    their actual error body instead of a generic HTTP status message."""
+
+
 def _base_url():
     return PRODUCTION_BASE if os.environ.get("MPESA_ENV") == "production" else SANDBOX_BASE
 
@@ -48,6 +53,17 @@ def _require_env(*names):
         )
 
 
+def _raise_for_status_with_body(resp):
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        try:
+            body = resp.json()
+        except ValueError:
+            body = resp.text
+        raise MpesaAPIError(f"Safaricom returned {resp.status_code}: {body}") from err
+
+
 def get_access_token():
     _require_env("MPESA_CONSUMER_KEY", "MPESA_CONSUMER_SECRET")
     key = os.environ["MPESA_CONSUMER_KEY"]
@@ -58,7 +74,7 @@ def get_access_token():
         auth=(key, secret),
         timeout=15,
     )
-    resp.raise_for_status()
+    _raise_for_status_with_body(resp)
     return resp.json()["access_token"]
 
 
@@ -84,14 +100,14 @@ def initiate_stk_push(phone_number, amount, account_reference, description):
     password, timestamp = _password_and_timestamp()
 
     payload = {
-        "BusinessShortCode": shortcode,
+        "BusinessShortCode": int(shortcode),
         "Password": password,
         "Timestamp": timestamp,
         "TransactionType": "CustomerPayBillOnline",
-        "Amount": amount,
-        "PartyA": phone_number,
-        "PartyB": shortcode,
-        "PhoneNumber": phone_number,
+        "Amount": int(amount),
+        "PartyA": int(phone_number),
+        "PartyB": int(shortcode),
+        "PhoneNumber": int(phone_number),
         "CallBackURL": callback_url,
         "AccountReference": account_reference,
         "TransactionDesc": description,
@@ -103,7 +119,7 @@ def initiate_stk_push(phone_number, amount, account_reference, description):
         headers={"Authorization": f"Bearer {token}"},
         timeout=15,
     )
-    resp.raise_for_status()
+    _raise_for_status_with_body(resp)
     return resp.json()
 
 
