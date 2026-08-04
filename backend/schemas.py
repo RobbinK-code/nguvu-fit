@@ -109,8 +109,8 @@ class QuoteSchema(Schema):
 
 
 class STKPushSchema(Schema):
-    phone_number = fields.String(required=True, validate=validate.Regexp(r"^2547\d{8}$",
-                                  error="phone_number must be in the format 2547XXXXXXXX."))
+    phone_number = fields.String(required=True, validate=validate.Regexp(r"^254[71]\d{8}$",
+                                  error="phone_number must be a Safaricom number in the format 2547XXXXXXXX or 2541XXXXXXXX."))
     plan = fields.String(load_default="monthly", validate=validate.OneOf(["monthly", "annual"]))
 
 
