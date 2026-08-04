@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../lib/AuthContext";
 import { api } from "../lib/api";
+import PhoneInput, { normalizeLocalNumber, isValidKenyanLocalNumber } from "../components/PhoneInput";
 import "./Subscribe.css";
 
 const PLANS = [
@@ -21,7 +22,8 @@ const POLL_TIMEOUT_MS = 60000;
 export default function Subscribe() {
   const { user, refreshUser } = useAuth();
   const [plan, setPlan] = useState("monthly");
-  const [phone, setPhone] = useState("2547");
+  const [country, setCountry] = useState("KE");
+  const [localNumber, setLocalNumber] = useState("");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState(null);
 
@@ -74,11 +76,19 @@ export default function Subscribe() {
 
   async function handleSubscribe(e) {
     e.preventDefault();
+
+    if (!isValidKenyanLocalNumber(localNumber)) {
+      setStatus("error");
+      setMessage("Enter a valid Safaricom number, e.g. 07XX XXX XXX or 01XX XXX XXX.");
+      return;
+    }
+
     stopPolling();
     setStatus("sending");
     setMessage(null);
+    const normalizedPhone = normalizeLocalNumber("254", localNumber);
     try {
-      const res = await api.subscribe({ phone_number: phone, plan });
+      const res = await api.subscribe({ phone_number: normalizedPhone, plan });
       setStatus("waiting");
       setMessage(null);
       pollForResult(res.checkout_request_id);
@@ -123,8 +133,9 @@ export default function Subscribe() {
           <div className="pulse-dot" aria-hidden="true" />
           <h3 className="waiting-title">Check your phone</h3>
           <p className="waiting-copy">
-            We sent an M-Pesa prompt to <strong>{phone}</strong>. Enter your PIN to complete the
-            payment - this screen will update automatically.
+            We sent an M-Pesa prompt to{" "}
+            <strong>+{normalizeLocalNumber("254", localNumber)}</strong>. Enter your PIN to
+            complete the payment - this screen will update automatically.
           </p>
           <button className="btn btn-secondary" onClick={reset}>
             Cancel
@@ -166,15 +177,13 @@ export default function Subscribe() {
 
             <div className="field">
               <label htmlFor="phone">M-Pesa phone number</label>
-              <input
-                id="phone"
-                required
-                pattern="2547\d{8}"
-                title="Format: 2547XXXXXXXX"
-                placeholder="2547XXXXXXXX"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+              <PhoneInput
+                country={country}
+                onCountryChange={setCountry}
+                localNumber={localNumber}
+                onLocalNumberChange={setLocalNumber}
               />
+              <p className="field-hint">M-Pesa currently only supports Safaricom Kenya numbers.</p>
             </div>
 
             <button className="btn btn-primary btn-block" disabled={busy}>
