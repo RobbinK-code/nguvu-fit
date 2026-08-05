@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { api } from "../lib/api";
+import { buildWeeklyVolume } from "../lib/progress";
 import "./History.css";
+
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="chart-tooltip">
+      <p className="chart-tooltip-label mono">{label}</p>
+      <p className="chart-tooltip-value">{payload[0].value} session{payload[0].value === 1 ? "" : "s"}</p>
+    </div>
+  );
+}
 
 export default function History() {
   const [logs, setLogs] = useState([]);
@@ -25,6 +37,8 @@ export default function History() {
 
   if (loading) return <div className="page-loading container">Loading history…</div>;
 
+  const weeklyVolume = buildWeeklyVolume(logs, 8);
+
   return (
     <div className="container history">
       <h2 className="section-title">Your history</h2>
@@ -39,6 +53,34 @@ export default function History() {
           <span className="stat-value">{stats?.total_minutes ?? 0}</span>
         </div>
       </div>
+
+      {logs.length > 0 && (
+        <div className="card chart-card">
+          <span className="stat-label mono">SESSIONS PER WEEK · LAST 8 WEEKS</span>
+          <div className="chart-wrap">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={weeklyVolume} margin={{ top: 16, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="#ece5d8" />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 11, fill: "#736c60" }}
+                  axisLine={{ stroke: "#ece5d8" }}
+                  tickLine={false}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: "#736c60" }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={24}
+                />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255, 90, 54, 0.06)" }} />
+                <Bar dataKey="sessions" fill="#ff5a36" radius={[4, 4, 0, 0]} maxBarSize={28} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       {error && <p className="error-text">{error}</p>}
 
