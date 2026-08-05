@@ -37,6 +37,40 @@ export function countThisWeek(logs) {
   return logs.filter((l) => new Date(l.completed_at) >= startOfWeek).length;
 }
 
+// Buckets logs into the last `weeksBack` Monday-start weeks (oldest first)
+// for a simple sessions-per-week chart.
+export function buildWeeklyVolume(logs, weeksBack = 8) {
+  const now = new Date();
+  const startOfThisWeek = new Date(now);
+  const day = (startOfThisWeek.getDay() + 6) % 7;
+  startOfThisWeek.setDate(startOfThisWeek.getDate() - day);
+  startOfThisWeek.setHours(0, 0, 0, 0);
+
+  const weeks = [];
+  for (let i = weeksBack - 1; i >= 0; i--) {
+    const start = new Date(startOfThisWeek);
+    start.setDate(start.getDate() - i * 7);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    weeks.push({ start, end, sessions: 0, minutes: 0 });
+  }
+
+  for (const log of logs || []) {
+    const at = new Date(log.completed_at);
+    const bucket = weeks.find((w) => at >= w.start && at < w.end);
+    if (bucket) {
+      bucket.sessions += 1;
+      bucket.minutes += log.duration_minutes || 0;
+    }
+  }
+
+  return weeks.map((w) => ({
+    label: w.start.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+    sessions: w.sessions,
+    minutes: w.minutes,
+  }));
+}
+
 export const MILESTONES = [
   { id: "first", label: "First session", check: (s) => s.total_workouts >= 1 },
   { id: "five", label: "5 workouts logged", check: (s) => s.total_workouts >= 5 },
