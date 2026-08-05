@@ -37,15 +37,20 @@
 
 .stat-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.stat-card-streak {
+  background: linear-gradient(160deg, rgba(255, 90, 54, 0.08), var(--surface) 60%);
+  border-color: rgba(255, 90, 54, 0.25);
 }
 
 .stat-label {
@@ -56,6 +61,13 @@
 .stat-value {
   font-family: var(--font-display);
   font-size: 2.4rem;
+}
+
+.stat-value-unit {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--paper-dim);
 }
 
 .stat-value-small {
@@ -142,4 +154,58 @@
   .stat-row {
     grid-template-columns: 1fr;
   }
+}
+
+.week-progress-card {
+  margin-bottom: 24px;
+}
+
+.week-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.week-progress-count {
+  font-size: 0.8rem;
+  color: var(--paper-dim);
+}
+
+.week-progress-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+
+.week-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sunrise), var(--gold));
+  transition: width 0.4s ease;
+}
+
+.milestones-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.milestone-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(47, 182, 115, 0.1);
+  border: 1px solid rgba(47, 182, 115, 0.3);
+  color: #1f8a56;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.milestone-badge::before {
+  content: "✓";
 }
