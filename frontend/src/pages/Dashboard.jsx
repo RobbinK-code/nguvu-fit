@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
+import { computeStreak, countThisWeek, MILESTONES } from "../lib/progress";
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [logging, setLogging] = useState(null);
   const [logged, setLogged] = useState({});
+  const [logs, setLogs] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -19,16 +21,18 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
       try {
-        const [q, p] = await Promise.all([
+        const [q, p, l] = await Promise.all([
           api.getQuoteOfDay(),
           api.getPlan(3).catch((err) => {
             if (err.status === 400) return { needsProfile: true };
             throw err;
           }),
+          api.getLogs().catch(() => []),
         ]);
         if (!mounted) return;
         setQuote(q);
         setPlan(p);
+        setLogs(l);
       } catch (err) {
         if (mounted) setError(err.message);
       } finally {
@@ -41,14 +45,22 @@ export default function Dashboard() {
     };
   }, []);
 
+  const streak = computeStreak(logs);
+  const sessionsThisWeek = countThisWeek(logs);
+  const weeklyTarget = plan?.days?.length || 3;
+  const weekProgressPct = Math.min(100, Math.round((sessionsThisWeek / weeklyTarget) * 100));
+  const milestoneStats = { total_workouts: logs.length, total_minutes: logs.reduce((sum, l) => sum + (l.duration_minutes || 0), 0), streak };
+  const unlockedMilestones = MILESTONES.filter((m) => m.check(milestoneStats));
+
   async function handleLogDay(day) {
     setLogging(day.day_number);
     try {
-      await api.logWorkout({
+      const newLog = await api.logWorkout({
         workout_name: `Day ${day.day_number} - ${day.focus}`,
         duration_minutes: 30,
       });
       setLogged((l) => ({ ...l, [day.day_number]: true }));
+      setLogs((prev) => [newLog, ...prev]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -80,6 +92,14 @@ export default function Dashboard() {
       )}
 
       <div className="stat-row">
+        <div className="card stat-card stat-card-streak">
+          <span className="stat-label mono">STREAK</span>
+          <span className="stat-value">
+            {streak}
+            <span className="stat-value-unit">{streak === 1 ? " day" : " days"}</span>
+          </span>
+          <span className="stat-sub">{streak > 0 ? "keep it going" : "log a session to start"}</span>
+        </div>
         <div className="card stat-card">
           <span className="stat-label mono">BMI</span>
           <span className="stat-value">{plan?.bmi ?? "—"}</span>
@@ -103,6 +123,28 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <div className="card week-progress-card">
+        <div className="week-progress-header">
+          <span className="stat-label mono">WEEKLY PROGRESS</span>
+          <span className="week-progress-count mono">
+            {sessionsThisWeek} / {weeklyTarget} sessions
+          </span>
+        </div>
+        <div className="week-progress-track">
+          <div className="week-progress-fill" style={{ width: `${weekProgressPct}%` }} />
+        </div>
+      </div>
+
+      {unlockedMilestones.length > 0 && (
+        <div className="milestones-row">
+          {unlockedMilestones.map((m) => (
+            <span key={m.id} className="milestone-badge">
+              {m.label}
+            </span>
+          ))}
+        </div>
+      )}
 
       <h2 className="section-title">This week</h2>
       <div className="day-grid">
