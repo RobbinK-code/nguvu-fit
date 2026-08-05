@@ -1,23 +1,27 @@
 :root {
-  /* color */
-  --ink: #101715;
-  --surface: #17201d;
-  --surface-raised: #1e2925;
-  --line: #2b3733;
-  --paper: #f4f2ea;
-  --paper-dim: #b7beb6;
-  --sunrise: #e8491d;
-  --sunrise-dim: #b83a17;
-  --gold: #f2b705;
-  --acacia: #6fbe44;
-  --danger: #e15353;
+  /* Palette - warm, light, welcoming (kept the original variable names so
+     every existing page's CSS picks this up automatically; only the
+     values changed, not the token structure). */
+  --ink: #faf6ef;          /* page background - warm off-white */
+  --surface: #ffffff;      /* card background */
+  --surface-raised: #fbf8f2; /* input/field background */
+  --line: #ece5d8;         /* hairline borders */
+  --paper: #24211c;        /* primary text (dark, warm charcoal) */
+  --paper-dim: #736c60;    /* secondary/muted text */
+  --sunrise: #ff5a36;      /* primary accent - warm coral */
+  --sunrise-dim: #e64a28;
+  --gold: #f2a63d;         /* warm highlight / secondary accent */
+  --acacia: #2fb673;       /* success / active green */
+  --danger: #e0503f;
 
-  /* type */
-  --font-display: "Archivo Black", "Arial Black", sans-serif;
+  --shadow-card: 0 1px 2px rgba(36, 33, 28, 0.04), 0 6px 20px rgba(36, 33, 28, 0.06);
+  --shadow-card-hover: 0 2px 4px rgba(36, 33, 28, 0.06), 0 10px 28px rgba(36, 33, 28, 0.09);
+
+  --font-display: "Poppins", "Work Sans", sans-serif;
   --font-body: "Work Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -38,9 +42,9 @@ body {
 
 h1, h2, h3, .display {
   font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
   margin: 0;
 }
 
@@ -60,11 +64,11 @@ button {
 
 ::selection {
   background: var(--sunrise);
-  color: var(--paper);
+  color: #fff;
 }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--sunrise);
   outline-offset: 2px;
 }
 
@@ -82,8 +86,10 @@ button {
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 16px;
   padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .btn {
@@ -91,12 +97,12 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 22px;
-  border-radius: 3px;
+  padding: 12px 24px;
+  border-radius: 999px;
   border: 1px solid transparent;
   font-weight: 600;
   font-size: 0.95rem;
-  transition: transform 0.12s ease, background 0.12s ease;
+  transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
 }
 
 .btn:active {
@@ -105,7 +111,8 @@ button {
 
 .btn-primary {
   background: var(--sunrise);
-  color: var(--paper);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(255, 90, 54, 0.28);
 }
 
 .btn-primary:hover {
@@ -120,6 +127,7 @@ button {
 
 .btn-secondary:hover {
   border-color: var(--paper-dim);
+  background: var(--surface-raised);
 }
 
 .btn-block {
@@ -135,8 +143,7 @@ button {
 
 .field label {
   font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-weight: 600;
   color: var(--paper-dim);
 }
 
@@ -145,14 +152,14 @@ button {
 .field textarea {
   background: var(--surface-raised);
   border: 1px solid var(--line);
-  border-radius: 3px;
-  padding: 10px 12px;
+  border-radius: 10px;
+  padding: 11px 14px;
 }
 
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
-  border-color: var(--gold);
+  border-color: var(--sunrise);
 }
 
 .error-text {
@@ -163,25 +170,24 @@ button {
 .pill {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   border: 1px solid var(--line);
 }
 
 .pill-active {
-  background: rgba(111, 190, 68, 0.15);
-  border-color: var(--acacia);
-  color: var(--acacia);
+  background: rgba(47, 182, 115, 0.12);
+  border-color: rgba(47, 182, 115, 0.3);
+  color: #1f8a56;
 }
 
 .pill-free {
-  background: rgba(242, 183, 5, 0.12);
-  border-color: var(--gold);
-  color: var(--gold);
+  background: rgba(242, 166, 61, 0.14);
+  border-color: rgba(242, 166, 61, 0.35);
+  color: #b3781f;
 }
 
 .page-loading {
@@ -191,6 +197,29 @@ button {
 }
 
 .saved-text {
-  color: var(--acacia);
+  color: #1f8a56;
   font-size: 0.88rem;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--paper-dim);
+}
+
+.chip-on,
+.chip-active {
+  border-color: var(--sunrise);
+  background: rgba(255, 90, 54, 0.08);
+  color: var(--sunrise-dim);
 }
