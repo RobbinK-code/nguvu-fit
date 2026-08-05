@@ -92,12 +92,32 @@ export default function Profile() {
   return (
     <div className="onboarding container">
       <div className="profile-header">
-        <h2 className="onboarding-title">Your profile</h2>
-        <span className={`pill ${user.subscription_status === "active" ? "pill-active" : "pill-free"}`}>
-          {user.subscription_status === "active" ? "Subscribed" : "Free plan"}
-        </span>
+        <div className="profile-avatar" aria-hidden="true">
+          {user.name?.charAt(0)?.toUpperCase() || "?"}
+        </div>
+        <div>
+          <div className="profile-header-top">
+            <h2 className="onboarding-title">{user.name}</h2>
+            <span className={`pill ${user.subscription_status === "active" ? "pill-active" : "pill-free"}`}>
+              {user.subscription_status === "active" ? "Subscribed" : "Free plan"}
+            </span>
+          </div>
+          <p className="onboarding-sub">{user.email}</p>
+        </div>
       </div>
-      <p className="onboarding-sub">{user.email}</p>
+
+      {user.bmi && (
+        <div className="profile-quick-stats">
+          <div className="card profile-quick-stat">
+            <span className="stat-label mono">BMI</span>
+            <span className="stat-value stat-value-small">{user.bmi}</span>
+          </div>
+          <div className="card profile-quick-stat">
+            <span className="stat-label mono">GOAL</span>
+            <span className="stat-value stat-value-small">{user.goal?.replace("_", " ")}</span>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="card onboarding-card">
         <div className="grid-2">
