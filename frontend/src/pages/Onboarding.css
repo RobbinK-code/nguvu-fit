@@ -47,6 +47,6 @@
 
 .chip-on {
   border-color: var(--sunrise);
-  color: var(--paper);
-  background: rgba(232, 73, 29, 0.16);
+  color: var(--sunrise-dim);
+  background: rgba(255, 90, 54, 0.1);
 }
