@@ -38,3 +38,31 @@
   color: var(--gold);
   font-size: 0.85rem;
 }
+
+.chart-card {
+  margin: 24px 0 32px;
+}
+
+.chart-wrap {
+  margin-top: 16px;
+}
+
+.chart-tooltip {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: var(--shadow-card);
+}
+
+.chart-tooltip-label {
+  font-size: 0.72rem;
+  color: var(--paper-dim);
+  margin: 0 0 2px;
+}
+
+.chart-tooltip-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+}
