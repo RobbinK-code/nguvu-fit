@@ -5,9 +5,13 @@ import PhoneInput, { normalizeLocalNumber, isValidKenyanLocalNumber } from "../c
 import "./Subscribe.css";
 
 const PLANS = [
-  { value: "monthly", label: "Monthly", price: "KES 300 / month" },
-  { value: "annual", label: "Annual", price: "KES 3,000 / year" },
+  { value: "monthly", label: "Monthly", price: 300, unit: "/ month" },
+  { value: "annual", label: "Annual", price: 3000, unit: "/ year", badge: "Best value" },
 ];
+
+const MONTHLY_PRICE = PLANS.find((p) => p.value === "monthly").price;
+const ANNUAL_PRICE = PLANS.find((p) => p.value === "annual").price;
+const ANNUAL_SAVINGS_PCT = Math.round((1 - ANNUAL_PRICE / (MONTHLY_PRICE * 12)) * 100);
 
 const PERKS = [
   "Refreshable weekly plans (skip a stale week any time)",
@@ -160,19 +164,26 @@ export default function Subscribe() {
           <form className="card" onSubmit={handleSubscribe}>
             <div className="field">
               <label>Plan</label>
-              <div className="chip-row">
+              <div className="pricing-grid">
                 {PLANS.map((p) => (
                   <button
                     type="button"
                     key={p.value}
-                    className={`chip ${plan === p.value ? "chip-on" : ""}`}
+                    className={`pricing-card ${plan === p.value ? "pricing-card-selected" : ""}`}
                     onClick={() => setPlan(p.value)}
                   >
-                    {p.label}
+                    {p.badge && <span className="pricing-badge">{p.badge}</span>}
+                    <span className="pricing-label">{p.label}</span>
+                    <span className="pricing-amount">
+                      <span className="mono">KES {p.price.toLocaleString()}</span>
+                      <span className="pricing-unit">{p.unit}</span>
+                    </span>
+                    {p.value === "annual" && (
+                      <span className="pricing-savings">Save {ANNUAL_SAVINGS_PCT}% vs monthly</span>
+                    )}
                   </button>
                 ))}
               </div>
-              <p className="plan-price mono">{PLANS.find((p) => p.value === plan)?.price}</p>
             </div>
 
             <div className="field">
