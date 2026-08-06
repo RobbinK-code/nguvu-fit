@@ -74,6 +74,8 @@ export const api = {
   adminListUsers: () => request("/admin/users"),
   adminStats: () => request("/admin/stats"),
   adminToggleAdmin: (id) => request(`/admin/users/${id}/toggle-admin`, { method: "PATCH" }),
+  adminSetSubscription: (id, action, days) =>
+    request(`/admin/users/${id}/subscription`, { method: "PATCH", body: { action, days } }),
   adminDeleteUser: (id) => request(`/admin/users/${id}`, { method: "DELETE" }),
 };
 
