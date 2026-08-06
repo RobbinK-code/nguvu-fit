@@ -175,3 +175,51 @@ def test_admin_can_grant_and_revoke_subscription(client):
     )
     assert revoke.status_code == 200
     assert revoke.get_json()["has_premium"] is False
+
+
+def test_free_user_gets_limited_equipment_list(client):
+    headers = register(client)
+    resp = client.get("/equipment?muscle_group=legs", headers=headers)
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["is_premium"] is False
+    assert len(data["equipment"]) == 1
+
+
+def test_admin_gets_full_equipment_list(client):
+    with app.app_context():
+        admin = User(email="admin4@test.com", name="Admin", is_admin=True)
+        admin.set_password("password123")
+        db.session.add(admin)
+        db.session.commit()
+
+    resp = app.test_client().post("/auth/login", json={"email": "admin4@test.com", "password": "password123"})
+    headers = {"Authorization": f"Bearer {resp.get_json()['token']}"}
+
+    resp = app.test_client().get("/equipment?muscle_group=legs", headers=headers)
+    data = resp.get_json()
+    assert data["is_premium"] is True
+    assert len(data["equipment"]) > 1
+
+
+def test_free_user_cannot_refresh_plan(client):
+    headers = register(client)
+    client.patch("/profile", json={"height_cm": 180, "weight_kg": 80, "equipment": ["none"]}, headers=headers)
+    resp = client.get("/plan?days=2&refresh=1", headers=headers)
+    assert resp.status_code == 402
+
+
+def test_premium_user_can_refresh_plan(client):
+    with app.app_context():
+        admin = User(email="admin5@test.com", name="Admin", is_admin=True)
+        admin.set_password("password123")
+        db.session.add(admin)
+        db.session.commit()
+
+    resp = app.test_client().post("/auth/login", json={"email": "admin5@test.com", "password": "password123"})
+    headers = {"Authorization": f"Bearer {resp.get_json()['token']}"}
+    app.test_client().patch(
+        "/profile", json={"height_cm": 180, "weight_kg": 80, "equipment": ["none"]}, headers=headers
+    )
+    resp = app.test_client().get("/plan?days=2&refresh=1", headers=headers)
+    assert resp.status_code == 200
