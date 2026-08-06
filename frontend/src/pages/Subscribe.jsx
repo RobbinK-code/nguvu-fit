@@ -14,8 +14,8 @@ const ANNUAL_PRICE = PLANS.find((p) => p.value === "annual").price;
 const ANNUAL_SAVINGS_PCT = Math.round((1 - ANNUAL_PRICE / (MONTHLY_PRICE * 12)) * 100);
 
 const PERKS = [
-  "Refreshable weekly plans (skip a stale week any time)",
-  "Full workout history & progress stats",
+  "Shuffle your weekly plan any time you want something fresh",
+  "Full gym equipment library - every machine for every muscle group",
   "Priority additions to the exercise catalog",
 ];
 
