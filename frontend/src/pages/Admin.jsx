@@ -36,6 +36,15 @@ export default function Admin() {
     }
   }
 
+  async function handleSetSubscription(id, action) {
+    try {
+      await api.adminSetSubscription(id, action, 30);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   async function handleDelete(id) {
     if (!confirm("Delete this account? This can't be undone.")) return;
     try {
@@ -103,6 +112,21 @@ export default function Admin() {
                   >
                     {u.is_admin ? "Revoke admin" : "Make admin"}
                   </button>
+                  {u.subscription_status === "active" ? (
+                    <button
+                      className="btn btn-secondary btn-small"
+                      onClick={() => handleSetSubscription(u.id, "revoke")}
+                    >
+                      Revoke sub
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-secondary btn-small"
+                      onClick={() => handleSetSubscription(u.id, "grant")}
+                    >
+                      Grant 30 days
+                    </button>
+                  )}
                   <button
                     className="btn btn-secondary btn-small btn-danger"
                     disabled={u.id === currentUser.id}
