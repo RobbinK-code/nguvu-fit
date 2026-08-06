@@ -47,6 +47,10 @@ class UserSchema(Schema):
     is_admin = fields.Boolean(dump_only=True)
     subscription_status = fields.String(dump_only=True)
     subscription_expires_at = fields.DateTime(dump_only=True)
+    has_premium = fields.Method("get_has_premium", dump_only=True)
+
+    def get_has_premium(self, obj):
+        return obj.has_active_subscription()
 
     def get_bmi(self, obj):
         return obj.bmi
