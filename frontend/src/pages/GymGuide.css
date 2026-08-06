@@ -1,0 +1,114 @@
+.gym-guide {
+  padding: 48px 24px 100px;
+}
+
+.gym-guide h2 {
+  font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+  max-width: 620px;
+}
+
+.gym-guide-sub {
+  color: var(--paper-dim);
+  max-width: 560px;
+  margin: 14px 0 32px;
+  line-height: 1.6;
+}
+
+.gym-guide-upsell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+  background: linear-gradient(135deg, rgba(255, 90, 54, 0.06), rgba(242, 166, 61, 0.06));
+  border-color: rgba(255, 90, 54, 0.2);
+}
+
+.gym-guide-upsell p {
+  margin: 0;
+  max-width: 460px;
+  line-height: 1.5;
+}
+
+.gym-guide-section {
+  margin-bottom: 40px;
+}
+
+.gym-guide-group-title {
+  font-size: 1.05rem;
+  margin-bottom: 16px;
+  text-transform: capitalize;
+}
+
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.equipment-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.equipment-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-raised);
+  border-radius: 12px;
+  margin-bottom: 4px;
+}
+
+.equipment-card h4 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+.equipment-description {
+  color: var(--paper-dim);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.equipment-howto-toggle {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--sunrise-dim);
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0;
+}
+
+.equipment-howto-list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: var(--paper-dim);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gym-guide-section-highlight {
+  scroll-margin-top: 90px;
+  animation: gym-highlight-fade 2s ease;
+}
+
+@keyframes gym-highlight-fade {
+  0% {
+    background: rgba(255, 90, 54, 0.08);
+    border-radius: 12px;
+  }
+  100% {
+    background: transparent;
+  }
+}
