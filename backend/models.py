@@ -89,6 +89,8 @@ class User(db.Model):
         return round(self.weight_kg / (h_m * h_m), 1)
 
     def has_active_subscription(self):
+        if self.is_admin:
+            return True
         if self.subscription_status != "active":
             return False
         if self.subscription_expires_at and self.subscription_expires_at < datetime.utcnow():
