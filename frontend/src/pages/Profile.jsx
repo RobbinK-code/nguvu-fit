@@ -98,8 +98,8 @@ export default function Profile() {
         <div>
           <div className="profile-header-top">
             <h2 className="onboarding-title">{user.name}</h2>
-            <span className={`pill ${user.subscription_status === "active" ? "pill-active" : "pill-free"}`}>
-              {user.subscription_status === "active" ? "Subscribed" : "Free plan"}
+            <span className={`pill ${user.has_premium ? "pill-active" : "pill-free"}`}>
+              {user.has_premium ? "Premium" : "Free plan"}
             </span>
           </div>
           <p className="onboarding-sub">{user.email}</p>
