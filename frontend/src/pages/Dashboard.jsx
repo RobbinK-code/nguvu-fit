@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 import { computeStreak, countThisWeek, MILESTONES } from "../lib/progress";
@@ -7,13 +7,33 @@ import "./Dashboard.css";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [quote, setQuote] = useState(null);
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [shuffling, setShuffling] = useState(false);
   const [logging, setLogging] = useState(null);
   const [logged, setLogged] = useState({});
   const [logs, setLogs] = useState([]);
+
+  async function loadPlan(refresh = false) {
+    if (refresh) setShuffling(true);
+    setError(null);
+    try {
+      const p = await api.getPlan(3, refresh).catch((err) => {
+        if (err.status === 400) return { needsProfile: true };
+        if (err.status === 402) throw err;
+        throw err;
+      });
+      setPlan(p);
+      if (refresh) setLogged({});
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setShuffling(false);
+    }
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -146,7 +166,22 @@ export default function Dashboard() {
         </div>
       )}
 
-      <h2 className="section-title">This week</h2>
+      <div className="section-header-row">
+        <h2 className="section-title">This week</h2>
+        {user?.has_premium ? (
+          <button
+            className="btn btn-secondary btn-small"
+            onClick={() => loadPlan(true)}
+            disabled={shuffling}
+          >
+            {shuffling ? "Shuffling…" : "Shuffle plan"}
+          </button>
+        ) : (
+          <Link to="/subscribe" className="shuffle-upsell mono">
+            Premium: shuffle your plan any time
+          </Link>
+        )}
+      </div>
       <div className="day-grid">
         {plan?.days?.map((day) => (
           <div className="card day-card" key={day.day_number}>
@@ -157,10 +192,19 @@ export default function Dashboard() {
             <ul className="exercise-list">
               {day.exercises.map((ex, i) => (
                 <li key={i}>
-                  <span className="exercise-name">{ex.name}</span>
-                  <span className="exercise-detail mono">
-                    {ex.sets}× {ex.reps ? `${ex.reps} reps` : `${ex.duration_seconds}s`}
-                  </span>
+                  <div className="exercise-row">
+                    <span className="exercise-name">{ex.name}</span>
+                    <span className="exercise-detail mono">
+                      {ex.sets}× {ex.reps ? `${ex.reps} reps` : `${ex.duration_seconds}s`}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="gym-alt-link"
+                    onClick={() => navigate(`/gym-guide?group=${ex.muscle_group}`)}
+                  >
+                    At the gym instead →
+                  </button>
                 </li>
               ))}
             </ul>
