@@ -131,3 +131,47 @@ def test_subscribe_fails_gracefully_without_mpesa_config(client):
         "/payments/subscribe", json={"phone_number": "254712345678", "plan": "monthly"}, headers=headers
     )
     assert resp.status_code == 501
+
+
+def test_admin_has_premium_without_paying(client):
+    with app.app_context():
+        admin = User(email="admin2@test.com", name="Admin", is_admin=True)
+        admin.set_password("password123")
+        db.session.add(admin)
+        db.session.commit()
+
+    resp = app.test_client().post("/auth/login", json={"email": "admin2@test.com", "password": "password123"})
+    headers = {"Authorization": f"Bearer {resp.get_json()['token']}"}
+
+    me = app.test_client().get("/auth/me", headers=headers)
+    assert me.get_json()["has_premium"] is True
+    assert me.get_json()["subscription_status"] == "free"
+
+
+def test_admin_can_grant_and_revoke_subscription(client):
+    with app.app_context():
+        admin = User(email="admin3@test.com", name="Admin", is_admin=True)
+        admin.set_password("password123")
+        db.session.add(admin)
+        db.session.commit()
+
+    admin_resp = app.test_client().post(
+        "/auth/login", json={"email": "admin3@test.com", "password": "password123"}
+    )
+    admin_headers = {"Authorization": f"Bearer {admin_resp.get_json()['token']}"}
+
+    user_headers = register(client, email="regular@test.com")
+    me = app.test_client().get("/auth/me", headers=user_headers).get_json()
+    user_id = me["id"]
+
+    grant = app.test_client().patch(
+        f"/admin/users/{user_id}/subscription", json={"action": "grant", "days": 30}, headers=admin_headers
+    )
+    assert grant.status_code == 200
+    assert grant.get_json()["has_premium"] is True
+
+    revoke = app.test_client().patch(
+        f"/admin/users/{user_id}/subscription", json={"action": "revoke"}, headers=admin_headers
+    )
+    assert revoke.status_code == 200
+    assert revoke.get_json()["has_premium"] is False
