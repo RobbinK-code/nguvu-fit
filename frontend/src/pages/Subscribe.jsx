@@ -34,7 +34,7 @@ export default function Subscribe() {
   const pollTimer = useRef(null);
   const pollDeadline = useRef(null);
 
-  const isSubscribed = user?.subscription_status === "active";
+  const isSubscribed = Boolean(user?.has_premium);
 
   useEffect(() => {
     return () => clearInterval(pollTimer.current);
