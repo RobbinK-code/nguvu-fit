@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
+import PasswordField from "../components/PasswordField";
 import "./Auth.css";
 
 export default function Login() {
@@ -39,16 +40,13 @@ export default function Login() {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
           </div>
-          <div className="field">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
+          <PasswordField
+            id="password"
+            label="Password"
+            autoComplete="current-password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
           {error && <p className="error-text">{error}</p>}
           <button className="btn btn-primary btn-block" disabled={busy}>
             {busy ? "Logging in…" : "Log in"}

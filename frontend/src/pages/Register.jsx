@@ -1,18 +1,28 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
+import PasswordField from "../components/PasswordField";
 import "./Auth.css";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+
+  const showMismatch = form.confirmPassword.length > 0 && form.password !== form.confirmPassword;
+  const showMatch = form.confirmPassword.length > 0 && form.password === form.confirmPassword;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
+
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords don't match.");
+      return;
+    }
+
     setBusy(true);
     try {
       await register(form.email, form.password, form.name);
@@ -48,19 +58,32 @@ export default function Register() {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
           </div>
-          <div className="field">
-            <label htmlFor="password">Password (min 8 characters)</label>
-            <input
-              id="password"
-              type="password"
-              required
-              minLength={8}
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
+
+          <PasswordField
+            id="password"
+            label="Password (min 8 characters)"
+            minLength={8}
+            autoComplete="new-password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
+
+          <PasswordField
+            id="confirmPassword"
+            label="Confirm password"
+            minLength={8}
+            autoComplete="new-password"
+            value={form.confirmPassword}
+            onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+          />
+          {(showMismatch || showMatch) && (
+            <p className={`password-match-hint ${showMismatch ? "mismatch" : "match"}`}>
+              {showMismatch ? "Passwords don't match yet." : "Passwords match."}
+            </p>
+          )}
+
           {error && <p className="error-text">{error}</p>}
-          <button className="btn btn-primary btn-block" disabled={busy}>
+          <button className="btn btn-primary btn-block" disabled={busy || showMismatch}>
             {busy ? "Creating account…" : "Create account"}
           </button>
         </form>

@@ -58,7 +58,9 @@ export const api = {
   getProfile: () => request("/profile"),
   updateProfile: (payload) => request("/profile", { method: "PATCH", body: payload }),
 
-  getPlan: (days = 3) => request(`/plan?days=${days}`),
+  getPlan: (days = 3, refresh = false) => request(`/plan?days=${days}${refresh ? "&refresh=1" : ""}`),
+
+  getEquipment: (muscleGroup) => request(`/equipment${muscleGroup ? `?muscle_group=${muscleGroup}` : ""}`),
 
   getExercises: () => request("/exercises", { auth: false }),
 

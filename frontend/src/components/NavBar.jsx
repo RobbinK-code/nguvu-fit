@@ -21,6 +21,7 @@ export default function NavBar() {
         {user ? (
           <nav className="nav-links">
             <Link to="/dashboard">Dashboard</Link>
+            <Link to="/gym-guide">Gym Guide</Link>
             <Link to="/history">History</Link>
             <Link to="/subscribe">Subscribe</Link>
             <Link to="/profile">Profile</Link>

@@ -30,3 +30,46 @@
   text-decoration: none;
   font-weight: 600;
 }
+
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 42px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--paper-dim);
+  border-radius: 6px;
+}
+
+.password-toggle:hover {
+  color: var(--paper);
+  background: var(--surface-raised);
+}
+
+.password-match-hint {
+  font-size: 0.78rem;
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+.password-match-hint.match {
+  color: #1f8a56;
+}
+
+.password-match-hint.mismatch {
+  color: var(--danger);
+}

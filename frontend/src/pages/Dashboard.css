@@ -132,14 +132,55 @@
 
 .exercise-list li {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.92rem;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.exercise-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.exercise-row {
+  display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 0.92rem;
 }
 
 .exercise-detail {
   color: var(--paper-dim);
   font-size: 0.78rem;
+}
+
+.gym-alt-link {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--sunrise-dim);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-header-row .section-title {
+  margin-bottom: 0;
+}
+
+.shuffle-upsell {
+  font-size: 0.74rem;
+  color: var(--gold);
+  text-decoration: none;
 }
 
 .guidance-card ul {
@@ -204,7 +245,16 @@
   color: #1f8a56;
   font-size: 0.78rem;
   font-weight: 600;
+  animation: popIn 0.4s ease both;
 }
+
+.milestones-row .milestone-badge:nth-child(1) { animation-delay: 0s; }
+.milestones-row .milestone-badge:nth-child(2) { animation-delay: 0.06s; }
+.milestones-row .milestone-badge:nth-child(3) { animation-delay: 0.12s; }
+.milestones-row .milestone-badge:nth-child(4) { animation-delay: 0.18s; }
+.milestones-row .milestone-badge:nth-child(5) { animation-delay: 0.24s; }
+.milestones-row .milestone-badge:nth-child(6) { animation-delay: 0.3s; }
+.milestones-row .milestone-badge:nth-child(7) { animation-delay: 0.36s; }
 
 .milestone-badge::before {
   content: "✓";

@@ -9,8 +9,9 @@ from routes.logs import logs_bp
 from routes.quotes import quotes_bp
 from routes.payments import payments_bp
 from routes.admin import admin_bp
+from routes.equipment import equipment_bp
 
-for bp in (auth_bp, profile_bp, exercises_bp, plan_bp, logs_bp, quotes_bp, payments_bp, admin_bp):
+for bp in (auth_bp, profile_bp, exercises_bp, plan_bp, logs_bp, quotes_bp, payments_bp, admin_bp, equipment_bp):
     app.register_blueprint(bp)
 
 

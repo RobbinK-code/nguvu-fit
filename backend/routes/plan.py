@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from uuid import uuid4
 
 from models import Exercise
 from decorators import login_required
@@ -22,5 +23,14 @@ def get_plan(user):
     if not all_exercises:
         return jsonify({"error": "No exercises available yet."}), 400
 
-    plan = generate_plan(user, all_exercises, days=days)
+    refresh = request.args.get("refresh") in ("1", "true", "yes")
+    seed = None
+    if refresh:
+        if not user.has_active_subscription():
+            return jsonify(
+                {"error": "Regenerating your plan is a premium feature. Subscribe to shuffle any time."}
+            ), 402
+        seed = str(uuid4())
+
+    plan = generate_plan(user, all_exercises, days=days, seed=seed)
     return jsonify(plan), 200

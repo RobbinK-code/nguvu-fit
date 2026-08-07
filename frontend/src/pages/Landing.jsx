@@ -82,7 +82,7 @@ export default function Landing() {
         <h1 className="hero-title">
           Train with
           <br />
-          Nguvu.
+          <span className="hero-title-accent">Nguvu.</span>
         </h1>
         <p className="hero-sub">
           A plan built around your body, your goal, and your kitchen floor.
