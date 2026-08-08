@@ -15,6 +15,8 @@ const ANNUAL_SAVINGS_PCT = Math.round((1 - ANNUAL_PRICE / (MONTHLY_PRICE * 12)) 
 
 const PERKS = [
   "Shuffle your weekly plan any time you want something fresh",
+  "Train up to 6 days a week, not just 3",
+  "Track weight & measurements with real progress charts",
   "Full gym equipment library - every machine for every muscle group",
   "Priority additions to the exercise catalog",
 ];

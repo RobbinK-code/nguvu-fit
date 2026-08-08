@@ -223,3 +223,74 @@ def test_premium_user_can_refresh_plan(client):
     )
     resp = app.test_client().get("/plan?days=2&refresh=1", headers=headers)
     assert resp.status_code == 200
+
+
+def test_free_user_capped_at_three_day_plan(client):
+    headers = register(client)
+    client.patch("/profile", json={"height_cm": 180, "weight_kg": 80, "equipment": ["none"]}, headers=headers)
+    resp = client.get("/plan?days=5", headers=headers)
+    assert resp.status_code == 402
+
+
+def test_premium_user_can_get_longer_plan(client):
+    with app.app_context():
+        admin = User(email="admin6@test.com", name="Admin", is_admin=True)
+        admin.set_password("password123")
+        db.session.add(admin)
+        db.session.commit()
+
+    resp = app.test_client().post("/auth/login", json={"email": "admin6@test.com", "password": "password123"})
+    headers = {"Authorization": f"Bearer {resp.get_json()['token']}"}
+    app.test_client().patch(
+        "/profile", json={"height_cm": 180, "weight_kg": 80, "equipment": ["none"]}, headers=headers
+    )
+    resp = app.test_client().get("/plan?days=5", headers=headers)
+    assert resp.status_code == 200
+    assert len(resp.get_json()["days"]) == 5
+
+
+def test_free_user_cannot_access_metrics(client):
+    headers = register(client)
+    resp = client.get("/metrics", headers=headers)
+    assert resp.status_code == 402
+    resp = client.post("/metrics", json={"weight_kg": 80}, headers=headers)
+    assert resp.status_code == 402
+
+
+def test_premium_user_can_log_and_fetch_metrics(client):
+    with app.app_context():
+        admin = User(email="admin7@test.com", name="Admin", is_admin=True)
+        admin.set_password("password123")
+        db.session.add(admin)
+        db.session.commit()
+
+    resp = app.test_client().post("/auth/login", json={"email": "admin7@test.com", "password": "password123"})
+    headers = {"Authorization": f"Bearer {resp.get_json()['token']}"}
+
+    resp = app.test_client().post(
+        "/metrics", json={"weight_kg": 82.5, "waist_cm": 90}, headers=headers
+    )
+    assert resp.status_code == 201
+    assert resp.get_json()["weight_kg"] == 82.5
+
+    # weight_kg should sync onto the user's profile for BMI purposes
+    me = app.test_client().get("/auth/me", headers=headers).get_json()
+    assert me["weight_kg"] == 82.5
+
+    resp = app.test_client().get("/metrics", headers=headers)
+    assert resp.status_code == 200
+    assert len(resp.get_json()) == 1
+
+
+def test_metric_entry_requires_at_least_one_measurement(client):
+    with app.app_context():
+        admin = User(email="admin8@test.com", name="Admin", is_admin=True)
+        admin.set_password("password123")
+        db.session.add(admin)
+        db.session.commit()
+
+    resp = app.test_client().post("/auth/login", json={"email": "admin8@test.com", "password": "password123"})
+    headers = {"Authorization": f"Bearer {resp.get_json()['token']}"}
+
+    resp = app.test_client().post("/metrics", json={"notes": "no numbers here"}, headers=headers)
+    assert resp.status_code == 400

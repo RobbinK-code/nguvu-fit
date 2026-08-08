@@ -48,6 +48,7 @@ class User(db.Model):
 
     workout_logs = db.relationship("WorkoutLog", back_populates="user", cascade="all, delete-orphan")
     payments = db.relationship("Payment", back_populates="user", cascade="all, delete-orphan")
+    body_metric_logs = db.relationship("BodyMetricLog", back_populates="user", cascade="all, delete-orphan")
 
     @validates("email")
     def validate_email(self, key, value):
@@ -269,3 +270,36 @@ class Payment(db.Model):
 
     def __repr__(self):
         return f"<Payment {self.id} user={self.user_id} status={self.status}>"
+
+
+class BodyMetricLog(db.Model):
+    """A premium-only progress entry: weight and/or body measurements at a
+    point in time, so subscribers can chart real trends rather than just
+    seeing a single static weight field on their profile."""
+
+    __tablename__ = "body_metric_logs"
+
+    __table_args__ = (
+        CheckConstraint("weight_kg IS NULL OR weight_kg > 0", name="weight_positive"),
+        CheckConstraint("chest_cm IS NULL OR chest_cm > 0", name="chest_positive"),
+        CheckConstraint("waist_cm IS NULL OR waist_cm > 0", name="waist_positive"),
+        CheckConstraint("hips_cm IS NULL OR hips_cm > 0", name="hips_positive"),
+        CheckConstraint("arm_cm IS NULL OR arm_cm > 0", name="arm_positive"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    weight_kg = db.Column(db.Float)
+    chest_cm = db.Column(db.Float)
+    waist_cm = db.Column(db.Float)
+    hips_cm = db.Column(db.Float)
+    arm_cm = db.Column(db.Float)
+    notes = db.Column(db.String)
+
+    recorded_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+
+    user = db.relationship("User", back_populates="body_metric_logs")
+
+    def __repr__(self):
+        return f"<BodyMetricLog user={self.user_id} at={self.recorded_at}>"

@@ -16,8 +16,19 @@ def get_plan(user):
             {"error": "Set your height and weight in your profile first to generate a plan."}
         ), 400
 
+    FREE_MAX_DAYS = 3
+
     days = request.args.get("days", default=3, type=int)
     days = max(1, min(days, 6))
+    if days > FREE_MAX_DAYS and not user.has_active_subscription():
+        return jsonify(
+            {
+                "error": (
+                    f"Plans longer than {FREE_MAX_DAYS} days a week are a premium feature. "
+                    "Subscribe to train more days a week."
+                )
+            }
+        ), 402
 
     all_exercises = Exercise.query.all()
     if not all_exercises:

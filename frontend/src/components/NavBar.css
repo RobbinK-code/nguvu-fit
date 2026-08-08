@@ -12,6 +12,7 @@
   align-items: center;
   justify-content: space-between;
   height: 68px;
+  gap: 16px;
 }
 
 .brand {
@@ -20,6 +21,7 @@
   color: var(--paper);
   font-size: 1.1rem;
   letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 .brand span {
@@ -29,14 +31,21 @@
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 18px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav-links::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-links a {
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--paper-dim);
+  white-space: nowrap;
 }
 
 .nav-links a:hover {

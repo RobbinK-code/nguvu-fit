@@ -112,6 +112,23 @@ class QuoteSchema(Schema):
     author = fields.String(allow_none=True)
 
 
+class BodyMetricLogSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    weight_kg = fields.Float(allow_none=True, validate=validate.Range(min=1, max=400))
+    chest_cm = fields.Float(allow_none=True, validate=validate.Range(min=1, max=300))
+    waist_cm = fields.Float(allow_none=True, validate=validate.Range(min=1, max=300))
+    hips_cm = fields.Float(allow_none=True, validate=validate.Range(min=1, max=300))
+    arm_cm = fields.Float(allow_none=True, validate=validate.Range(min=1, max=200))
+    notes = fields.String(allow_none=True, validate=validate.Length(max=300))
+    recorded_at = fields.DateTime(dump_only=True)
+
+    @validates_schema
+    def validate_at_least_one_measurement(self, data, **kwargs):
+        fields_to_check = ["weight_kg", "chest_cm", "waist_cm", "hips_cm", "arm_cm"]
+        if not any(data.get(f) is not None for f in fields_to_check):
+            raise ValidationError("Provide at least one measurement.", "weight_kg")
+
+
 class STKPushSchema(Schema):
     phone_number = fields.String(required=True, validate=validate.Regexp(r"^254[71]\d{8}$",
                                   error="phone_number must be a Safaricom number in the format 2547XXXXXXXX or 2541XXXXXXXX."))
@@ -131,3 +148,5 @@ workout_logs_schema = WorkoutLogSchema(many=True)
 log_workout_schema = LogWorkoutSchema()
 quote_schema = QuoteSchema()
 stk_push_schema = STKPushSchema()
+body_metric_log_schema = BodyMetricLogSchema()
+body_metric_logs_schema = BodyMetricLogSchema(many=True)

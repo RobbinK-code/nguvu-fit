@@ -68,6 +68,10 @@ export const api = {
   logWorkout: (payload) => request("/logs", { method: "POST", body: payload }),
   getStats: () => request("/logs/stats"),
 
+  getMetrics: () => request("/metrics"),
+  logMetric: (payload) => request("/metrics", { method: "POST", body: payload }),
+  deleteMetric: (id) => request(`/metrics/${id}`, { method: "DELETE" }),
+
   getQuoteOfDay: () => request("/quotes/today"),
 
   subscribe: (payload) => request("/payments/subscribe", { method: "POST", body: payload }),
