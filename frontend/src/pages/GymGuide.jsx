@@ -24,6 +24,7 @@ export default function GymGuide() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
+  const [openVideoId, setOpenVideoId] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -75,24 +76,52 @@ export default function GymGuide() {
           <div className="equipment-grid">
             {items.map((item) => (
               <div key={item.id} className="card equipment-card">
-                <div className="equipment-icon">
-                  <EquipmentIcon icon={item.icon} />
+                <div className="equipment-visual">
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.name} className="equipment-image" loading="lazy" />
+                  ) : (
+                    <div className="equipment-icon">
+                      <EquipmentIcon icon={item.icon} />
+                    </div>
+                  )}
                 </div>
                 <h4>{item.name}</h4>
                 <p className="equipment-description">{item.description}</p>
-                <button
-                  type="button"
-                  className="equipment-howto-toggle"
-                  onClick={() => setOpenId(openId === item.id ? null : item.id)}
-                >
-                  {openId === item.id ? "Hide how-to" : "How to use it"}
-                </button>
+                <div className="equipment-actions">
+                  <button
+                    type="button"
+                    className="equipment-howto-toggle"
+                    onClick={() => setOpenId(openId === item.id ? null : item.id)}
+                  >
+                    {openId === item.id ? "Hide how-to" : "How to use it"}
+                  </button>
+                  {item.video_id && (
+                    <button
+                      type="button"
+                      className="equipment-howto-toggle"
+                      onClick={() => setOpenVideoId(openVideoId === item.id ? null : item.id)}
+                    >
+                      {openVideoId === item.id ? "Hide video" : "Watch video"}
+                    </button>
+                  )}
+                </div>
                 {openId === item.id && (
                   <ol className="equipment-howto-list">
                     {item.how_to.map((step, i) => (
                       <li key={i}>{step}</li>
                     ))}
                   </ol>
+                )}
+                {openVideoId === item.id && item.video_id && (
+                  <div className="equipment-video-wrap">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${item.video_id}`}
+                      title={`${item.name} demonstration`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      loading="lazy"
+                    />
+                  </div>
                 )}
               </div>
             ))}

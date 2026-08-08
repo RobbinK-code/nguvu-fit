@@ -230,8 +230,65 @@ EQUIPMENT = {
                 "Alternate between a steady pace and short bursts of higher intensity for interval training.",
             ],
         },
+        {
+            "id": "elliptical",
+            "name": "Elliptical Trainer",
+            "icon": "cardio",
+            "description": "A low-impact machine that combines a striding motion with moving handles, working "
+            "your legs and arms together with minimal joint stress.",
+            "how_to": [
+                "Stand tall with a light grip on the handles - don't lean your weight onto them.",
+                "Drive through your legs at a steady cadence, using the handles for extra upper-body work.",
+                "Try alternating direction (forward/reverse) to shift the emphasis on your legs.",
+            ],
+        },
+        {
+            "id": "stair-climber",
+            "name": "Stair Climber",
+            "icon": "cardio",
+            "description": "A step-mill or pedal-style stepper that simulates climbing stairs - excellent for "
+            "the legs and glutes alongside cardio conditioning.",
+            "how_to": [
+                "Stand upright and let your legs do the work rather than resting your weight on the rails.",
+                "Take full steps rather than short, shallow ones for better glute engagement.",
+                "Start at a moderate pace - it's harder than it looks.",
+            ],
+        },
+        {
+            "id": "assault-bike",
+            "name": "Assault Bike (Air Bike)",
+            "icon": "cardio",
+            "description": "A fan-resisted bike worked with both arms and legs - resistance scales with effort, "
+            "making it a favorite for short, brutal intervals.",
+            "how_to": [
+                "Push and pull the handles in sync with your pedaling for full-body engagement.",
+                "Use short, hard intervals (20-40 seconds) with rest between - it punishes pacing mistakes.",
+            ],
+        },
+        {
+            "id": "ski-erg",
+            "name": "Ski Erg",
+            "icon": "cardio",
+            "description": "A vertical cable-and-handle machine that mimics the pulling motion of cross-country "
+            "skiing - strong cardio plus real lat and core engagement.",
+            "how_to": [
+                "Stand tall, reach up, and pull both handles down together by hinging at the hips.",
+                "Drive the pull through your lats and core, not just your arms.",
+            ],
+        },
     ],
 }
+
+# Every entry gets `video_id` and `image_url` keys defaulting to None, so
+# the frontend doesn't need to special-case entries that don't have media
+# yet. To attach a video, add "video_id": "<the 11-character YouTube ID>"
+# to that entry above (the ID is the part after `v=` in a YouTube URL,
+# e.g. for https://www.youtube.com/watch?v=dQw4w9WgXcQ it's "dQw4w9WgXcQ").
+# To attach an image, add "image_url": "<a URL you have rights to use>".
+for _group_items in EQUIPMENT.values():
+    for _item in _group_items:
+        _item.setdefault("video_id", None)
+        _item.setdefault("image_url", None)
 
 
 def get_equipment(muscle_group=None):
