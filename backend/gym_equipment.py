@@ -11,6 +11,7 @@ EQUIPMENT = {
             "id": "leg-press",
             "name": "Leg Press Machine",
             "icon": "plate-stack",
+            "video_id": "CHPHn-OnTqE",
             "description": "A seated machine that lets you push weight away with your legs - "
             "one of the safest ways to load your legs heavily without needing a spotter.",
             "how_to": [
@@ -24,6 +25,7 @@ EQUIPMENT = {
             "id": "leg-extension",
             "name": "Leg Extension Machine",
             "icon": "cable",
+            "video_id": "MXvSzXEBOTI",
             "description": "An isolation machine that targets your quads directly by extending your knee against resistance.",
             "how_to": [
                 "Sit with your back against the pad and the ankle pad resting just above your feet.",
@@ -35,6 +37,7 @@ EQUIPMENT = {
             "id": "smith-squat",
             "name": "Smith Machine Squat",
             "icon": "barbell",
+            "video_id": "DUWK_gKcRCc",
             "description": "A guided barbell fixed on vertical rails - a good stepping stone into barbell squats "
             "since the bar path is fixed for you.",
             "how_to": [
@@ -49,6 +52,7 @@ EQUIPMENT = {
             "id": "chest-press-machine",
             "name": "Chest Press Machine",
             "icon": "plate-stack",
+            "video_id": "pLofEAcfsO8",
             "description": "A seated pressing machine that mimics a bench press without needing a spotter.",
             "how_to": [
                 "Adjust the seat so the handles sit at chest height.",
@@ -60,6 +64,7 @@ EQUIPMENT = {
             "id": "cable-crossover",
             "name": "Cable Crossover",
             "icon": "cable",
+            "video_id": "QcTcWpkn_bw",
             "description": "Two adjustable cable towers that let you bring your hands together in front of you, "
             "targeting the chest through a long range of motion.",
             "how_to": [
@@ -72,6 +77,7 @@ EQUIPMENT = {
             "id": "smith-bench-press",
             "name": "Smith Machine Bench Press",
             "icon": "barbell",
+            "video_id": "7FyJdsXeta8",
             "description": "A fixed-rail bar over a bench - a guided way to work up to a free-weight bench press.",
             "how_to": [
                 "Lie on the bench under the bar with it aligned over your chest.",
@@ -84,6 +90,7 @@ EQUIPMENT = {
             "id": "lat-pulldown",
             "name": "Lat Pulldown",
             "icon": "cable",
+            "video_id": "Z_3xHwuO8Tk",
             "description": "A cable machine that mimics a pull-up, letting you build pulling strength "
             "with adjustable weight.",
             "how_to": [
@@ -96,6 +103,7 @@ EQUIPMENT = {
             "id": "seated-row",
             "name": "Seated Cable Row",
             "icon": "cable",
+            "video_id": "vwHG9Jfu4sw",
             "description": "A seated pulling machine that targets your mid-back by rowing a handle toward your torso.",
             "how_to": [
                 "Sit with knees slightly bent, feet on the platform, and grab the handle.",
@@ -109,6 +117,7 @@ EQUIPMENT = {
             "id": "shoulder-press-machine",
             "name": "Shoulder Press Machine",
             "icon": "plate-stack",
+            "video_id": "BAZkFGeUy5U",
             "description": "A seated pressing machine for your shoulders, safer than free weights when working near failure.",
             "how_to": [
                 "Sit with the handles at shoulder height and your back flat against the pad.",
@@ -120,6 +129,7 @@ EQUIPMENT = {
             "id": "lateral-raise-machine",
             "name": "Lateral Raise Machine",
             "icon": "cable",
+            "video_id": "IropE3iOk2c",
             "description": "An isolation machine for the side of your shoulders, mimicking a dumbbell lateral raise.",
             "how_to": [
                 "Sit with your arms against the pads at your sides.",
@@ -133,6 +143,7 @@ EQUIPMENT = {
             "id": "cable-tricep-pushdown",
             "name": "Cable Tricep Pushdown",
             "icon": "cable",
+            "video_id": "-zLyUAo1gMw",
             "description": "A cable exercise isolating your triceps by pushing a bar or rope downward.",
             "how_to": [
                 "Grab the attachment with an overhand grip, elbows tucked to your sides.",
@@ -144,6 +155,7 @@ EQUIPMENT = {
             "id": "cable-bicep-curl",
             "name": "Cable Bicep Curl",
             "icon": "cable",
+            "video_id": "5z4y7QRTx1w",
             "description": "A cable version of a bicep curl - constant tension through the whole movement.",
             "how_to": [
                 "Stand facing the low pulley, grab the bar with an underhand grip.",
@@ -157,6 +169,7 @@ EQUIPMENT = {
             "id": "cable-woodchopper",
             "name": "Cable Woodchopper",
             "icon": "cable",
+            "video_id": "he4IhLc1d5k",
             "description": "A rotational cable exercise that builds core strength through a twisting motion.",
             "how_to": [
                 "Set the pulley high, grab the handle with both hands, and stand side-on to the machine.",
@@ -168,6 +181,7 @@ EQUIPMENT = {
             "id": "ab-crunch-machine",
             "name": "Ab Crunch Machine",
             "icon": "plate-stack",
+            "video_id": "G8937xqkxDo",
             "description": "A seated machine that loads a crunching motion, letting you add resistance to core work.",
             "how_to": [
                 "Sit with your chest against the pad and hands on the grips.",
@@ -191,6 +205,7 @@ EQUIPMENT = {
             "id": "kettlebells",
             "name": "Kettlebells",
             "icon": "barbell",
+            "video_id": "aNDUbH_Uv4g",
             "description": "Versatile free weights good for swings, goblet squats, and full-body conditioning circuits.",
             "how_to": [
                 "Start with a weight you can control through a full range of motion.",
