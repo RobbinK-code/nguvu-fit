@@ -63,8 +63,6 @@ QUOTES = [
 
 def seed():
     with app.app_context():
-        db.create_all()
-
         print("Clearing existing catalog data...")
         Exercise.query.delete()
         Quote.query.delete()
