@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime, timedelta
 
 from app import app
 from config import db
@@ -294,3 +295,73 @@ def test_metric_entry_requires_at_least_one_measurement(client):
 
     resp = app.test_client().post("/metrics", json={"notes": "no numbers here"}, headers=headers)
     assert resp.status_code == 400
+
+
+def test_forgot_password_returns_generic_message_for_unknown_email(client):
+    resp = client.post("/auth/forgot-password", json={"email": "nobody@test.com"})
+    assert resp.status_code == 200
+    assert "If an account exists" in resp.get_json()["message"]
+
+
+def test_forgot_password_generates_token_for_real_user(client):
+    client.post("/auth/register", json={"email": "reset@test.com", "password": "password123", "name": "R"})
+
+    resp = client.post("/auth/forgot-password", json={"email": "reset@test.com"})
+    assert resp.status_code == 200
+
+    with app.app_context():
+        user = User.query.filter_by(email="reset@test.com").first()
+        assert user.reset_token is not None
+        assert user.reset_token_expires_at is not None
+
+
+def test_reset_password_with_valid_token(client):
+    client.post("/auth/register", json={"email": "reset2@test.com", "password": "password123", "name": "R"})
+
+    with app.app_context():
+        user = User.query.filter_by(email="reset2@test.com").first()
+        token = user.generate_reset_token()
+        db.session.commit()
+
+    resp = client.post("/auth/reset-password", json={"token": token, "new_password": "newpassword456"})
+    assert resp.status_code == 200
+
+    # old password should no longer work, new one should
+    resp = client.post("/auth/login", json={"email": "reset2@test.com", "password": "password123"})
+    assert resp.status_code == 401
+    resp = client.post("/auth/login", json={"email": "reset2@test.com", "password": "newpassword456"})
+    assert resp.status_code == 200
+
+
+def test_reset_password_with_invalid_token_rejected(client):
+    resp = client.post("/auth/reset-password", json={"token": "not-a-real-token", "new_password": "newpassword456"})
+    assert resp.status_code == 400
+
+
+def test_reset_password_with_expired_token_rejected(client):
+    client.post("/auth/register", json={"email": "reset3@test.com", "password": "password123", "name": "R"})
+
+    with app.app_context():
+        user = User.query.filter_by(email="reset3@test.com").first()
+        user.generate_reset_token()
+        user.reset_token_expires_at = datetime.utcnow() - timedelta(hours=1)
+        db.session.commit()
+        token = user.reset_token
+
+    resp = client.post("/auth/reset-password", json={"token": token, "new_password": "newpassword456"})
+    assert resp.status_code == 400
+
+
+def test_reset_token_cannot_be_reused(client):
+    client.post("/auth/register", json={"email": "reset4@test.com", "password": "password123", "name": "R"})
+
+    with app.app_context():
+        user = User.query.filter_by(email="reset4@test.com").first()
+        token = user.generate_reset_token()
+        db.session.commit()
+
+    first = client.post("/auth/reset-password", json={"token": token, "new_password": "newpassword456"})
+    assert first.status_code == 200
+
+    second = client.post("/auth/reset-password", json={"token": token, "new_password": "anotherpassword789"})
+    assert second.status_code == 400

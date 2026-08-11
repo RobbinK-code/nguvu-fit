@@ -14,6 +14,15 @@ class LoginSchema(Schema):
     password = fields.String(required=True)
 
 
+class ForgotPasswordSchema(Schema):
+    email = fields.Email(required=True)
+
+
+class ResetPasswordSchema(Schema):
+    token = fields.String(required=True, validate=validate.Length(min=1))
+    new_password = fields.String(required=True, validate=validate.Length(min=8, max=128))
+
+
 class ProfileUpdateSchema(Schema):
     name = fields.String(validate=validate.Length(min=1, max=100))
     age = fields.Integer(allow_none=True, validate=validate.Range(min=10, max=100))
@@ -137,6 +146,8 @@ class STKPushSchema(Schema):
 
 register_schema = RegisterSchema()
 login_schema = LoginSchema()
+forgot_password_schema = ForgotPasswordSchema()
+reset_password_schema = ResetPasswordSchema()
 profile_update_schema = ProfileUpdateSchema()
 user_schema = UserSchema()
 exercise_schema = ExerciseSchema()

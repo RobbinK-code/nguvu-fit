@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from sqlalchemy import CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import validates
@@ -43,6 +43,9 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     subscription_status = db.Column(db.String, default="free", nullable=False)
     subscription_expires_at = db.Column(db.DateTime)
+
+    reset_token = db.Column(db.String, unique=True)
+    reset_token_expires_at = db.Column(db.DateTime)
 
     created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
 
@@ -97,6 +100,25 @@ class User(db.Model):
         if self.subscription_expires_at and self.subscription_expires_at < datetime.utcnow():
             return False
         return True
+
+    def generate_reset_token(self):
+        import secrets
+
+        self.reset_token = secrets.token_urlsafe(32)
+        self.reset_token_expires_at = datetime.utcnow() + timedelta(hours=1)
+        return self.reset_token
+
+    def clear_reset_token(self):
+        self.reset_token = None
+        self.reset_token_expires_at = None
+
+    def reset_token_is_valid(self, token):
+        return (
+            self.reset_token is not None
+            and self.reset_token == token
+            and self.reset_token_expires_at is not None
+            and self.reset_token_expires_at > datetime.utcnow()
+        )
 
     def __repr__(self):
         return f"<User {self.id}: {self.email}>"

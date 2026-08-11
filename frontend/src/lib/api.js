@@ -53,6 +53,9 @@ function flattenErrors(errors) {
 export const api = {
   register: (payload) => request("/auth/register", { method: "POST", body: payload, auth: false }),
   login: (payload) => request("/auth/login", { method: "POST", body: payload, auth: false }),
+  forgotPassword: (email) => request("/auth/forgot-password", { method: "POST", body: { email }, auth: false }),
+  resetPassword: (token, newPassword) =>
+    request("/auth/reset-password", { method: "POST", body: { token, new_password: newPassword }, auth: false }),
   me: () => request("/auth/me"),
 
   getProfile: () => request("/profile"),

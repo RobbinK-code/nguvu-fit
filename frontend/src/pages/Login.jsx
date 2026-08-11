@@ -47,6 +47,9 @@ export default function Login() {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
+          <p className="forgot-password-link">
+            <Link to="/forgot-password">Forgot your password?</Link>
+          </p>
           {error && <p className="error-text">{error}</p>}
           <button className="btn btn-primary btn-block" disabled={busy}>
             {busy ? "Logging in…" : "Log in"}

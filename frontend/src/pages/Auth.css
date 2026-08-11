@@ -73,3 +73,18 @@
 .password-match-hint.mismatch {
   color: var(--danger);
 }
+
+.forgot-password-link {
+  text-align: right;
+  margin: -8px 0 16px;
+}
+
+.forgot-password-link a {
+  font-size: 0.8rem;
+  color: var(--paper-dim);
+  text-decoration: none;
+}
+
+.forgot-password-link a:hover {
+  color: var(--sunrise-dim);
+}
