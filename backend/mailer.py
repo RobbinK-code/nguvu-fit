@@ -1,24 +1,33 @@
-"""Transactional email via plain SMTP - works with Gmail (app password),
-SendGrid, Mailgun, or any other provider's SMTP relay, so you're not
-locked into one vendor.
+"""Transactional email via Resend's HTTP API (https://resend.com).
+
+Deliberately NOT using SMTP: Render's free/starter tier blocks outbound
+SMTP ports (25/465/587) as an anti-spam measure, so smtplib connections
+fail with "Network is unreachable" no matter how correct the credentials
+are. An HTTP API call over port 443 isn't affected by that block.
 
 Required environment variables:
-    SMTP_HOST
-    SMTP_PORT           (587 for TLS is standard)
-    SMTP_USERNAME
-    SMTP_PASSWORD
-    SMTP_FROM_EMAIL      the address recipients see as the sender
+    RESEND_API_KEY       from https://resend.com/api-keys
+    RESEND_FROM_EMAIL     the address recipients see as the sender - can be
+                           "onboarding@resend.dev" for testing without
+                           verifying your own domain first
 
 Nothing here works until those are set - calls raise EmailConfigError
 until then, exactly like mpesa.py does for missing Daraja credentials.
 """
 import os
-import smtplib
-from email.message import EmailMessage
+
+import requests
+
+RESEND_API_URL = "https://api.resend.com/emails"
 
 
 class EmailConfigError(Exception):
     pass
+
+
+class EmailAPIError(Exception):
+    """Raised when Resend's API itself rejects the request - carries
+    their actual error body instead of a generic HTTP status message."""
 
 
 def _require_env(*names):
@@ -26,26 +35,33 @@ def _require_env(*names):
     if missing:
         raise EmailConfigError(
             f"Missing email environment variables: {', '.join(missing)}. "
-            "Set these to a real SMTP provider before sending emails."
+            "Set RESEND_API_KEY and RESEND_FROM_EMAIL before sending emails."
         )
 
 
 def send_email(to, subject, body_text):
-    _require_env("SMTP_HOST", "SMTP_PORT", "SMTP_USERNAME", "SMTP_PASSWORD", "SMTP_FROM_EMAIL")
+    _require_env("RESEND_API_KEY", "RESEND_FROM_EMAIL")
 
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = os.environ["SMTP_FROM_EMAIL"]
-    msg["To"] = to
-    msg.set_content(body_text)
+    payload = {
+        "from": os.environ["RESEND_FROM_EMAIL"],
+        "to": [to],
+        "subject": subject,
+        "text": body_text,
+    }
 
-    host = os.environ["SMTP_HOST"]
-    port = int(os.environ["SMTP_PORT"])
+    resp = requests.post(
+        RESEND_API_URL,
+        json=payload,
+        headers={"Authorization": f"Bearer {os.environ['RESEND_API_KEY']}"},
+        timeout=15,
+    )
 
-    with smtplib.SMTP(host, port, timeout=15) as server:
-        server.starttls()
-        server.login(os.environ["SMTP_USERNAME"], os.environ["SMTP_PASSWORD"])
-        server.send_message(msg)
+    if not resp.ok:
+        try:
+            body = resp.json()
+        except ValueError:
+            body = resp.text
+        raise EmailAPIError(f"Resend returned {resp.status_code}: {body}")
 
 
 def send_password_reset_email(to, reset_url):
