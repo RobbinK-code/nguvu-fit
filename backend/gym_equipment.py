@@ -194,6 +194,7 @@ EQUIPMENT = {
             "id": "functional-trainer",
             "name": "Functional Trainer (Dual Cable Station)",
             "icon": "cable",
+            "video_id": "s7Imc8VI9cw",
             "description": "A dual-pulley station that can mimic almost any bodyweight movement with added resistance - "
             "squats, presses, rows, and rotations, all in one machine.",
             "how_to": [
@@ -218,6 +219,7 @@ EQUIPMENT = {
             "id": "treadmill",
             "name": "Treadmill",
             "icon": "cardio",
+            "video_id": "76XnbF5DBFY",
             "description": "A motorized running belt - the most direct gym equivalent to outdoor running or brisk walking.",
             "how_to": [
                 "Start slow to get a feel for the belt speed before increasing pace.",
@@ -228,6 +230,7 @@ EQUIPMENT = {
             "id": "rowing-machine",
             "name": "Rowing Machine",
             "icon": "cardio",
+            "video_id": "4zWu1yuJ0_g",
             "description": "A full-body cardio machine that also works your back and legs - a strong alternative to "
             "bodyweight cardio circuits.",
             "how_to": [
@@ -239,6 +242,7 @@ EQUIPMENT = {
             "id": "stationary-bike",
             "name": "Stationary Bike",
             "icon": "cardio",
+            "video_id": "jSEsIZ9ucgM",
             "description": "A low-impact cardio option, good for intervals without the joint stress of running.",
             "how_to": [
                 "Set the seat height so your knee has a slight bend at the bottom of the pedal stroke.",
@@ -249,6 +253,7 @@ EQUIPMENT = {
             "id": "elliptical",
             "name": "Elliptical Trainer",
             "icon": "cardio",
+            "video_id": "RakIFxUmSpA",
             "description": "A low-impact machine that combines a striding motion with moving handles, working "
             "your legs and arms together with minimal joint stress.",
             "how_to": [
@@ -261,6 +266,7 @@ EQUIPMENT = {
             "id": "stair-climber",
             "name": "Stair Climber",
             "icon": "cardio",
+            "video_id": "ST-5lD69XqU",
             "description": "A step-mill or pedal-style stepper that simulates climbing stairs - excellent for "
             "the legs and glutes alongside cardio conditioning.",
             "how_to": [
@@ -273,6 +279,7 @@ EQUIPMENT = {
             "id": "assault-bike",
             "name": "Assault Bike (Air Bike)",
             "icon": "cardio",
+            "video_id": "H7LglMSGCzo",
             "description": "A fan-resisted bike worked with both arms and legs - resistance scales with effort, "
             "making it a favorite for short, brutal intervals.",
             "how_to": [
@@ -284,6 +291,7 @@ EQUIPMENT = {
             "id": "ski-erg",
             "name": "Ski Erg",
             "icon": "cardio",
+            "video_id": "B0lIgT5PHc8",
             "description": "A vertical cable-and-handle machine that mimics the pulling motion of cross-country "
             "skiing - strong cardio plus real lat and core engagement.",
             "how_to": [
