@@ -4,42 +4,49 @@ import os
 from config import app, db
 from models import Exercise, Quote, User
 
+# video_id: verified via real web search (never guessed) - the ID is the
+# part after v= in a YouTube URL. None means no video attached yet; add
+# one any time by filling in this field for that entry.
+#
+# tracking_type controls how the exercise is measured and displayed:
+#   "reps"     - standard sets x reps (e.g. 3 x 12 squats)
+#   "hold"     - an isometric hold, measured in seconds per set (e.g. plank)
+#   "duration" - a single continuous timed effort (e.g. 40s of jumping jacks)
 EXERCISES = [
-    # name, category, muscle_group, equipment, difficulty
-    ("Bodyweight Squat", "strength", "legs", "none", "beginner"),
-    ("Walking Lunge", "strength", "legs", "none", "beginner"),
-    ("Glute Bridge", "strength", "legs", "none", "beginner"),
-    ("Push-Up", "strength", "chest", "none", "beginner"),
-    ("Diamond Push-Up", "strength", "chest", "none", "intermediate"),
-    ("Chair Tricep Dip", "strength", "arms", "none", "beginner"),
-    ("Superman Hold", "strength", "back", "none", "beginner"),
-    ("Pike Push-Up", "strength", "shoulders", "none", "intermediate"),
-    ("Plank", "strength", "core", "none", "beginner"),
-    ("Bicycle Crunch", "strength", "core", "none", "beginner"),
-    ("Russian Twist", "strength", "core", "none", "beginner"),
-    ("Dumbbell Row", "strength", "back", "dumbbells", "intermediate"),
-    ("Dumbbell Shoulder Press", "strength", "shoulders", "dumbbells", "intermediate"),
-    ("Goblet Squat", "strength", "legs", "dumbbells", "intermediate"),
-    ("Resistance Band Row", "strength", "back", "bands", "beginner"),
-    ("Resistance Band Squat", "strength", "legs", "bands", "beginner"),
-    ("Jumping Jacks", "cardio", "cardio", "none", "beginner"),
-    ("High Knees", "cardio", "cardio", "none", "beginner"),
-    ("Mountain Climbers", "cardio", "cardio", "none", "beginner"),
-    ("Burpees", "cardio", "cardio", "none", "intermediate"),
-    ("Squat Jumps", "cardio", "legs", "none", "intermediate"),
-    ("Skater Hops", "cardio", "legs", "none", "intermediate"),
-    ("Shadow Boxing", "cardio", "cardio", "none", "beginner"),
-    ("Jump Rope", "cardio", "cardio", "none", "beginner"),
-    ("Butt Kicks", "cardio", "cardio", "none", "beginner"),
-    ("Plank Jacks", "cardio", "core", "none", "intermediate"),
-    ("Tuck Jumps", "cardio", "legs", "none", "advanced"),
-    ("Wall Sit", "mobility", "legs", "none", "beginner"),
-    ("Sun Salutation Flow", "mobility", "full_body", "none", "beginner"),
-    ("Cat-Cow Stretch", "mobility", "back", "none", "beginner"),
-    ("Hip Flexor Stretch", "mobility", "legs", "none", "beginner"),
-    ("Shoulder Rolls & Stretch", "mobility", "shoulders", "none", "beginner"),
-    ("Standing Quad Stretch", "mobility", "legs", "none", "beginner"),
-    ("Child's Pose Hold", "mobility", "back", "none", "beginner"),
+    {"name": "Bodyweight Squat", "category": "strength", "muscle_group": "legs", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": "CKcDiJnLaLY"},
+    {"name": "Walking Lunge", "category": "strength", "muscle_group": "legs", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": "BenhAbJiTsw"},
+    {"name": "Glute Bridge", "category": "strength", "muscle_group": "legs", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": "nuapk_-Q2BI"},
+    {"name": "Push-Up", "category": "strength", "muscle_group": "chest", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": None},
+    {"name": "Diamond Push-Up", "category": "strength", "muscle_group": "chest", "equipment": "none", "difficulty": "advanced", "tracking_type": "reps", "video_id": "2-OFbQ9GLpE"},
+    {"name": "Chair Tricep Dip", "category": "strength", "muscle_group": "arms", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": "jDafIn0WMUw"},
+    {"name": "Superman Hold", "category": "strength", "muscle_group": "back", "equipment": "none", "difficulty": "beginner", "tracking_type": "hold", "video_id": "LZoWdePF1NQ"},
+    {"name": "Pike Push-Up", "category": "strength", "muscle_group": "shoulders", "equipment": "none", "difficulty": "intermediate", "tracking_type": "reps", "video_id": "pHR5yG6xBps"},
+    {"name": "Plank", "category": "strength", "muscle_group": "core", "equipment": "none", "difficulty": "beginner", "tracking_type": "hold", "video_id": "mwlp75MS6Rg"},
+    {"name": "Bicycle Crunch", "category": "strength", "muscle_group": "core", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": None},
+    {"name": "Russian Twist", "category": "strength", "muscle_group": "core", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": None},
+    {"name": "Dumbbell Row", "category": "strength", "muscle_group": "back", "equipment": "dumbbells", "difficulty": "intermediate", "tracking_type": "reps", "video_id": None},
+    {"name": "Dumbbell Shoulder Press", "category": "strength", "muscle_group": "shoulders", "equipment": "dumbbells", "difficulty": "intermediate", "tracking_type": "reps", "video_id": None},
+    {"name": "Goblet Squat", "category": "strength", "muscle_group": "legs", "equipment": "dumbbells", "difficulty": "intermediate", "tracking_type": "reps", "video_id": None},
+    {"name": "Resistance Band Row", "category": "strength", "muscle_group": "back", "equipment": "bands", "difficulty": "beginner", "tracking_type": "reps", "video_id": None},
+    {"name": "Resistance Band Squat", "category": "strength", "muscle_group": "legs", "equipment": "bands", "difficulty": "beginner", "tracking_type": "reps", "video_id": None},
+    {"name": "Jumping Jacks", "category": "cardio", "muscle_group": "cardio", "equipment": "none", "difficulty": "beginner", "tracking_type": "duration", "video_id": None},
+    {"name": "High Knees", "category": "cardio", "muscle_group": "cardio", "equipment": "none", "difficulty": "beginner", "tracking_type": "duration", "video_id": None},
+    {"name": "Mountain Climbers", "category": "cardio", "muscle_group": "cardio", "equipment": "none", "difficulty": "beginner", "tracking_type": "duration", "video_id": "ixxk9Qfn61o"},
+    {"name": "Burpees", "category": "cardio", "muscle_group": "cardio", "equipment": "none", "difficulty": "advanced", "tracking_type": "duration", "video_id": "fZx6nxKMq4E"},
+    {"name": "Squat Jumps", "category": "cardio", "muscle_group": "legs", "equipment": "none", "difficulty": "intermediate", "tracking_type": "duration", "video_id": None},
+    {"name": "Skater Hops", "category": "cardio", "muscle_group": "legs", "equipment": "none", "difficulty": "intermediate", "tracking_type": "duration", "video_id": None},
+    {"name": "Shadow Boxing", "category": "cardio", "muscle_group": "cardio", "equipment": "none", "difficulty": "beginner", "tracking_type": "duration", "video_id": None},
+    {"name": "Jump Rope", "category": "cardio", "muscle_group": "cardio", "equipment": "none", "difficulty": "beginner", "tracking_type": "duration", "video_id": None},
+    {"name": "Butt Kicks", "category": "cardio", "muscle_group": "cardio", "equipment": "none", "difficulty": "beginner", "tracking_type": "duration", "video_id": None},
+    {"name": "Plank Jacks", "category": "cardio", "muscle_group": "core", "equipment": "none", "difficulty": "intermediate", "tracking_type": "duration", "video_id": None},
+    {"name": "Tuck Jumps", "category": "cardio", "muscle_group": "legs", "equipment": "none", "difficulty": "advanced", "tracking_type": "duration", "video_id": None},
+    {"name": "Wall Sit", "category": "mobility", "muscle_group": "legs", "equipment": "none", "difficulty": "beginner", "tracking_type": "hold", "video_id": "JQ2JBphtUk8"},
+    {"name": "Sun Salutation Flow", "category": "mobility", "muscle_group": "full_body", "equipment": "none", "difficulty": "beginner", "tracking_type": "duration", "video_id": None},
+    {"name": "Cat-Cow Stretch", "category": "mobility", "muscle_group": "back", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": "xyNwxiuERXc"},
+    {"name": "Hip Flexor Stretch", "category": "mobility", "muscle_group": "legs", "equipment": "none", "difficulty": "beginner", "tracking_type": "hold", "video_id": None},
+    {"name": "Shoulder Rolls & Stretch", "category": "mobility", "muscle_group": "shoulders", "equipment": "none", "difficulty": "beginner", "tracking_type": "reps", "video_id": None},
+    {"name": "Standing Quad Stretch", "category": "mobility", "muscle_group": "legs", "equipment": "none", "difficulty": "beginner", "tracking_type": "hold", "video_id": None},
+    {"name": "Child's Pose Hold", "category": "mobility", "muscle_group": "back", "equipment": "none", "difficulty": "beginner", "tracking_type": "hold", "video_id": "_ZX_zTOBgp8"},
 ]
 
 QUOTES = [
@@ -69,14 +76,16 @@ def seed():
         db.session.commit()
 
         print("Seeding exercises...")
-        for name, category, muscle_group, equipment, difficulty in EXERCISES:
+        for ex in EXERCISES:
             db.session.add(
                 Exercise(
-                    name=name,
-                    category=category,
-                    muscle_group=muscle_group,
-                    equipment=equipment,
-                    difficulty=difficulty,
+                    name=ex["name"],
+                    category=ex["category"],
+                    muscle_group=ex["muscle_group"],
+                    equipment=ex["equipment"],
+                    difficulty=ex["difficulty"],
+                    tracking_type=ex["tracking_type"],
+                    video_id=ex["video_id"],
                 )
             )
 

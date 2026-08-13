@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, validate, validates, validates_schema, ValidationError
 
-from models import VALID_CATEGORIES, VALID_MUSCLE_GROUPS, VALID_EQUIPMENT, VALID_GOALS
+from models import VALID_CATEGORIES, VALID_MUSCLE_GROUPS, VALID_EQUIPMENT, VALID_GOALS, VALID_TIERS
 
 
 class RegisterSchema(Schema):
@@ -33,6 +33,7 @@ class ProfileUpdateSchema(Schema):
     goal = fields.String(validate=validate.OneOf(VALID_GOALS))
     equipment = fields.List(fields.String(validate=validate.OneOf(VALID_EQUIPMENT)))
     focus_areas = fields.List(fields.String(validate=validate.OneOf(VALID_MUSCLE_GROUPS)))
+    fitness_tier = fields.String(validate=validate.OneOf(VALID_TIERS))
 
     @validates_schema
     def validate_target(self, data, **kwargs):
@@ -52,6 +53,7 @@ class UserSchema(Schema):
     goal = fields.String()
     equipment = fields.List(fields.String())
     focus_areas = fields.List(fields.String())
+    fitness_tier = fields.String()
     bmi = fields.Method("get_bmi", dump_only=True)
     is_admin = fields.Boolean(dump_only=True)
     subscription_status = fields.String(dump_only=True)
@@ -72,6 +74,8 @@ class ExerciseSchema(Schema):
     muscle_group = fields.String(required=True, validate=validate.OneOf(VALID_MUSCLE_GROUPS))
     equipment = fields.String(validate=validate.OneOf(VALID_EQUIPMENT), load_default="none")
     difficulty = fields.String(load_default="beginner")
+    tracking_type = fields.String(load_default="reps")
+    video_id = fields.String(allow_none=True)
 
 
 class WorkoutExerciseSchema(Schema):

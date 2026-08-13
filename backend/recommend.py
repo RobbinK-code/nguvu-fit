@@ -2,8 +2,8 @@
 
 No external ML/API calls - this is a deterministic scoring + selection
 algorithm over the exercise catalog, driven by the user's goal, equipment,
-and focus areas. Kept rule-based (rather than calling an LLM) so it's
-free to run, fast, and fully explainable.
+focus areas, and fitness tier. Kept rule-based (rather than calling an
+LLM) so it's free to run, fast, and fully explainable.
 """
 import random
 from datetime import date
@@ -20,6 +20,29 @@ GOAL_CATEGORY_WEIGHTS = {
 
 SAFE_MAX_WEEKLY_RATE_KG = 1.0
 EXERCISES_PER_DAY = 5
+
+DIFFICULTY_ORDER = ["beginner", "intermediate", "advanced"]
+
+# A fitness tier caps which exercise difficulties are eligible to be
+# picked. "legendary" doesn't unlock new content beyond "advanced" (we
+# don't have a harder difficulty tag) - it's expressed instead through
+# higher volume in _sets_reps_for.
+TIER_TO_MAX_DIFFICULTY = {
+    "beginner": "beginner",
+    "intermediate": "intermediate",
+    "advanced": "advanced",
+    "legendary": "advanced",
+}
+
+# Progression multipliers per tier - this is what actually makes leveling
+# up feel different: more sets, more reps, longer holds, not just "harder
+# exercises unlocked".
+TIER_VOLUME = {
+    "beginner": {"reps": 10, "hold_seconds": 15, "duration_seconds": 30, "sets": 3},
+    "intermediate": {"reps": 12, "hold_seconds": 30, "duration_seconds": 40, "sets": 3},
+    "advanced": {"reps": 15, "hold_seconds": 45, "duration_seconds": 45, "sets": 4},
+    "legendary": {"reps": 20, "hold_seconds": 60, "duration_seconds": 60, "sets": 4},
+}
 
 
 def bmi_category(bmi):
@@ -62,6 +85,33 @@ def _usable_equipment(user_equipment):
     return equipment
 
 
+def _age_based_max_difficulty(age):
+    """A hard safety ceiling that no tier selection can override. Young
+    users shouldn't be programmed advanced/high-skill bodyweight moves
+    (e.g. diamond push-ups, tuck jumps) regardless of what tier they or a
+    parent picks - growth-plate and technique-risk considerations, not
+    just preference."""
+    if age is None:
+        return "advanced"
+    if age < 13:
+        return "beginner"
+    if age < 16:
+        return "intermediate"
+    return "advanced"
+
+
+def effective_max_difficulty(user):
+    tier_cap = TIER_TO_MAX_DIFFICULTY.get(user.fitness_tier, "beginner")
+    age_cap = _age_based_max_difficulty(user.age)
+    # Whichever cap is stricter (lower index in DIFFICULTY_ORDER) wins.
+    return min([tier_cap, age_cap], key=DIFFICULTY_ORDER.index)
+
+
+def _allowed_difficulties(max_difficulty):
+    cutoff = DIFFICULTY_ORDER.index(max_difficulty)
+    return set(DIFFICULTY_ORDER[: cutoff + 1])
+
+
 def _pick_exercises(pool, category, count, focus_areas, exclude_ids):
     candidates = [e for e in pool if e.category == category and e.id not in exclude_ids]
     if not candidates:
@@ -80,29 +130,43 @@ def _pick_exercises(pool, category, count, focus_areas, exclude_ids):
     return ordered[:count]
 
 
-def _sets_reps_for(exercise):
-    if exercise.category == "strength":
-        return {"sets": 3, "reps": 12, "duration_seconds": None}
-    if exercise.category == "cardio":
-        return {"sets": 1, "reps": None, "duration_seconds": 40}
-    if exercise.category == "mobility":
-        return {"sets": 2, "reps": None, "duration_seconds": 30}
-    return {"sets": 3, "reps": 12, "duration_seconds": None}
+def _sets_reps_for(exercise, tier):
+    volume = TIER_VOLUME.get(tier, TIER_VOLUME["beginner"])
+
+    if exercise.tracking_type == "hold":
+        return {"sets": volume["sets"], "reps": None, "duration_seconds": volume["hold_seconds"]}
+    if exercise.tracking_type == "duration":
+        return {"sets": 1, "reps": None, "duration_seconds": volume["duration_seconds"]}
+    # default: "reps"
+    return {"sets": volume["sets"], "reps": volume["reps"], "duration_seconds": None}
 
 
 def generate_plan(user, all_exercises, days=3, seed=None):
     """Builds a `days`-long weekly plan tailored to the user's goal,
-    equipment, and focus areas. Returns plain dicts (not ORM objects) so
-    the plan doesn't need to be persisted before it's shown to the user.
+    equipment, focus areas, and fitness tier (capped by an age-based
+    safety ceiling). Returns plain dicts (not ORM objects) so the plan
+    doesn't need to be persisted before it's shown to the user.
     """
     rng_seed = seed if seed is not None else f"{user.id}-{date.today().isoformat()}"
     random.seed(rng_seed)
 
     usable = _usable_equipment(user.equipment)
-    pool = [e for e in all_exercises if e.equipment in usable]
+    max_difficulty = effective_max_difficulty(user)
+    allowed_difficulties = _allowed_difficulties(max_difficulty)
+
+    pool = [
+        e for e in all_exercises
+        if e.equipment in usable and e.difficulty in allowed_difficulties
+    ]
+    # If filtering leaves too little to build a real plan (e.g. a very
+    # young user with a thin catalog at "beginner" only), fall back to
+    # the full equipment-filtered pool rather than serving an empty plan.
+    if len(pool) < EXERCISES_PER_DAY:
+        pool = [e for e in all_exercises if e.equipment in usable]
 
     weights = GOAL_CATEGORY_WEIGHTS.get(user.goal, GOAL_CATEGORY_WEIGHTS["lose_fat"])
     focus_areas = set(user.focus_areas or [])
+    tier = user.fitness_tier or "beginner"
 
     plan_days = []
     used_ids = set()
@@ -140,7 +204,10 @@ def generate_plan(user, all_exercises, days=3, seed=None):
                         "name": ex.name,
                         "category": ex.category,
                         "muscle_group": ex.muscle_group,
-                        **_sets_reps_for(ex),
+                        "difficulty": ex.difficulty,
+                        "tracking_type": ex.tracking_type,
+                        "video_id": ex.video_id,
+                        **_sets_reps_for(ex, tier),
                     }
                     for ex in day_exercises
                 ],
@@ -149,15 +216,16 @@ def generate_plan(user, all_exercises, days=3, seed=None):
 
     return {
         "goal": user.goal,
+        "fitness_tier": tier,
         "bmi": user.bmi,
         "bmi_category": bmi_category(user.bmi),
         "pace": target_pace(user),
         "days": plan_days,
-        "guidance": _guidance_text(user),
+        "guidance": _guidance_text(user, max_difficulty),
     }
 
 
-def _guidance_text(user):
+def _guidance_text(user, max_difficulty):
     tips = [
         "Warm up for 5 minutes before each session and stretch afterward.",
         "Aim for consistency over intensity - three solid sessions a week beats one brutal one.",
@@ -171,6 +239,17 @@ def _guidance_text(user):
         tips.append(
             "Make sure you're eating enough protein and total calories to support muscle repair."
         )
+
+    if user.age is not None and user.age < 16 and max_difficulty != TIER_TO_MAX_DIFFICULTY.get(user.fitness_tier, "beginner"):
+        tips.append(
+            "Exercise difficulty has been capped for a younger athlete, regardless of fitness tier - "
+            "this adjusts automatically as age increases."
+        )
+
+    tips.append(
+        "If a workout starts feeling too easy, raise your fitness tier in your profile for more "
+        "volume and harder movements."
+    )
 
     pace = target_pace(user)
     if pace and not pace.get("error") and not pace.get("is_safe_pace"):

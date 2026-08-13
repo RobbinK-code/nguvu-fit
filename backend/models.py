@@ -13,6 +13,8 @@ VALID_MUSCLE_GROUPS = (
 VALID_EQUIPMENT = ("none", "dumbbells", "bands", "full_gym")
 VALID_GOALS = ("lose_fat", "build_muscle", "endurance", "mobility")
 VALID_SUBSCRIPTION_STATUSES = ("free", "active", "expired")
+VALID_TRACKING_TYPES = ("reps", "hold", "duration")
+VALID_TIERS = ("beginner", "intermediate", "advanced", "legendary")
 
 
 class User(db.Model):
@@ -39,6 +41,7 @@ class User(db.Model):
     goal = db.Column(db.String, default="lose_fat", nullable=False)
     equipment = db.Column(db.JSON, default=list)
     focus_areas = db.Column(db.JSON, default=list)
+    fitness_tier = db.Column(db.String, default="beginner", nullable=False)
 
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     subscription_status = db.Column(db.String, default="free", nullable=False)
@@ -69,6 +72,12 @@ class User(db.Model):
     def validate_goal(self, key, value):
         if value not in VALID_GOALS:
             raise ValueError(f"goal must be one of {VALID_GOALS}.")
+        return value
+
+    @validates("fitness_tier")
+    def validate_fitness_tier(self, key, value):
+        if value not in VALID_TIERS:
+            raise ValueError(f"fitness_tier must be one of {VALID_TIERS}.")
         return value
 
     @validates("subscription_status")
@@ -138,6 +147,8 @@ class Exercise(db.Model):
     muscle_group = db.Column(db.String, nullable=False)
     equipment = db.Column(db.String, default="none", nullable=False)
     difficulty = db.Column(db.String, default="beginner", nullable=False)
+    tracking_type = db.Column(db.String, default="reps", nullable=False)
+    video_id = db.Column(db.String)
 
     workout_exercises = db.relationship("WorkoutExercise", back_populates="exercise", cascade="all, delete-orphan")
 
@@ -163,6 +174,12 @@ class Exercise(db.Model):
     def validate_equipment(self, key, value):
         if value not in VALID_EQUIPMENT:
             raise ValueError(f"equipment must be one of {VALID_EQUIPMENT}.")
+        return value
+
+    @validates("tracking_type")
+    def validate_tracking_type(self, key, value):
+        if value not in VALID_TRACKING_TYPES:
+            raise ValueError(f"tracking_type must be one of {VALID_TRACKING_TYPES}.")
         return value
 
     def __repr__(self):

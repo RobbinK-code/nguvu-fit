@@ -365,3 +365,57 @@ def test_reset_token_cannot_be_reused(client):
 
     second = client.post("/auth/reset-password", json={"token": token, "new_password": "anotherpassword789"})
     assert second.status_code == 400
+
+
+def test_young_user_never_gets_advanced_exercises_even_on_legendary_tier(client):
+    headers = register(client, email="kid@test.com")
+    client.patch(
+        "/profile",
+        json={"age": 12, "height_cm": 150, "weight_kg": 45, "equipment": ["none"], "fitness_tier": "legendary"},
+        headers=headers,
+    )
+    resp = client.get("/plan?days=3", headers=headers)
+    assert resp.status_code == 200
+    difficulties = {ex["difficulty"] for day in resp.get_json()["days"] for ex in day["exercises"]}
+    assert "advanced" not in difficulties
+
+
+def test_adult_beginner_tier_gets_lower_volume_than_legendary(client):
+    headers_beginner = register(client, email="beginner@test.com")
+    client.patch(
+        "/profile",
+        json={"age": 30, "height_cm": 180, "weight_kg": 80, "equipment": ["none"], "fitness_tier": "beginner"},
+        headers=headers_beginner,
+    )
+    beginner_plan = client.get("/plan?days=1", headers=headers_beginner).get_json()
+    beginner_reps_exercise = next(
+        ex for day in beginner_plan["days"] for ex in day["exercises"] if ex["tracking_type"] == "reps"
+    )
+
+    headers_legendary = register(client, email="legendary@test.com")
+    client.patch(
+        "/profile",
+        json={"age": 30, "height_cm": 180, "weight_kg": 80, "equipment": ["none"], "fitness_tier": "legendary"},
+        headers=headers_legendary,
+    )
+    legendary_plan = client.get("/plan?days=1", headers=headers_legendary).get_json()
+    legendary_reps_exercise = next(
+        ex for day in legendary_plan["days"] for ex in day["exercises"] if ex["tracking_type"] == "reps"
+    )
+
+    assert legendary_reps_exercise["reps"] > beginner_reps_exercise["reps"]
+
+
+def test_hold_exercises_use_duration_not_reps(client):
+    headers = register(client, email="holdtest@test.com")
+    client.patch(
+        "/profile",
+        json={"age": 30, "height_cm": 180, "weight_kg": 80, "equipment": ["none"], "focus_areas": ["core"]},
+        headers=headers,
+    )
+    resp = client.get("/plan?days=3", headers=headers)
+    plan = resp.get_json()
+    hold_exercises = [ex for day in plan["days"] for ex in day["exercises"] if ex["tracking_type"] == "hold"]
+    for ex in hold_exercises:
+        assert ex["reps"] is None
+        assert ex["duration_seconds"] is not None and ex["duration_seconds"] > 0
