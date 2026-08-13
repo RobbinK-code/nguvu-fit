@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [logging, setLogging] = useState(null);
   const [logged, setLogged] = useState({});
   const [logs, setLogs] = useState([]);
+  const [openVideoKey, setOpenVideoKey] = useState(null);
 
   async function loadPlan(refresh = false) {
     if (refresh) setShuffling(true);
@@ -190,23 +191,48 @@ export default function Dashboard() {
               <span className="day-focus">{day.focus}</span>
             </div>
             <ul className="exercise-list">
-              {day.exercises.map((ex, i) => (
-                <li key={i}>
-                  <div className="exercise-row">
-                    <span className="exercise-name">{ex.name}</span>
-                    <span className="exercise-detail mono">
-                      {ex.sets}× {ex.reps ? `${ex.reps} reps` : `${ex.duration_seconds}s`}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="gym-alt-link"
-                    onClick={() => navigate(`/gym-guide?group=${ex.muscle_group}`)}
-                  >
-                    At the gym instead →
-                  </button>
-                </li>
-              ))}
+              {day.exercises.map((ex, i) => {
+                const videoKey = `${day.day_number}-${i}`;
+                return (
+                  <li key={i}>
+                    <div className="exercise-row">
+                      <span className="exercise-name">{ex.name}</span>
+                      <span className="exercise-detail mono">
+                        {ex.sets}× {ex.reps ? `${ex.reps} reps` : `${ex.duration_seconds}s`}
+                      </span>
+                    </div>
+                    <div className="exercise-links">
+                      <button
+                        type="button"
+                        className="gym-alt-link"
+                        onClick={() => navigate(`/gym-guide?group=${ex.muscle_group}`)}
+                      >
+                        At the gym instead →
+                      </button>
+                      {ex.video_id && (
+                        <button
+                          type="button"
+                          className="gym-alt-link"
+                          onClick={() => setOpenVideoKey(openVideoKey === videoKey ? null : videoKey)}
+                        >
+                          {openVideoKey === videoKey ? "Hide video" : "Watch video"}
+                        </button>
+                      )}
+                    </div>
+                    {openVideoKey === videoKey && ex.video_id && (
+                      <div className="exercise-video-wrap">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${ex.video_id}`}
+                          title={`${ex.name} demonstration`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
             <button
               className="btn btn-secondary btn-block"

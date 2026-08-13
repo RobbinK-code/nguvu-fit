@@ -32,12 +32,55 @@
 
 .profile-quick-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  max-width: 320px;
+  max-width: 480px;
   margin-bottom: 32px;
 }
 
 .profile-quick-stat {
   padding: 16px;
+}
+
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.tier-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: left;
+}
+
+.tier-card:hover {
+  border-color: var(--paper-dim);
+}
+
+.tier-card-selected {
+  border-color: var(--sunrise);
+  background: rgba(255, 90, 54, 0.05);
+}
+
+.tier-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+.tier-blurb {
+  font-size: 0.76rem;
+  color: var(--paper-dim);
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: var(--paper-dim);
+  margin-top: 8px;
 }

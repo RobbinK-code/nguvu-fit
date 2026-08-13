@@ -20,6 +20,13 @@ const EQUIPMENT = [
 
 const FOCUS_AREAS = ["legs", "chest", "back", "shoulders", "arms", "core", "full_body"];
 
+const TIERS = [
+  { value: "beginner", label: "Beginner", blurb: "Building the habit" },
+  { value: "intermediate", label: "Intermediate", blurb: "Comfortable with the basics" },
+  { value: "advanced", label: "Advanced", blurb: "Ready for more volume" },
+  { value: "legendary", label: "Legendary", blurb: "Push me to the limit" },
+];
+
 export default function Profile() {
   const { user, refreshUser } = useAuth();
   const [form, setForm] = useState(null);
@@ -36,6 +43,7 @@ export default function Profile() {
         goal: user.goal ?? "lose_fat",
         equipment: user.equipment?.length ? user.equipment : ["none"],
         focus_areas: user.focus_areas ?? [],
+        fitness_tier: user.fitness_tier ?? "beginner",
         target_weight_kg: user.target_weight_kg ?? "",
         target_date: user.target_date ?? "",
       });
@@ -75,6 +83,7 @@ export default function Profile() {
         goal: form.goal,
         equipment: form.equipment.length ? form.equipment : ["none"],
         focus_areas: form.focus_areas,
+        fitness_tier: form.fitness_tier,
       };
       if (form.target_weight_kg) payload.target_weight_kg = Number(form.target_weight_kg);
       if (form.target_date) payload.target_date = form.target_date;
@@ -115,6 +124,10 @@ export default function Profile() {
           <div className="card profile-quick-stat">
             <span className="stat-label mono">GOAL</span>
             <span className="stat-value stat-value-small">{user.goal?.replace("_", " ")}</span>
+          </div>
+          <div className="card profile-quick-stat">
+            <span className="stat-label mono">TIER</span>
+            <span className="stat-value stat-value-small">{user.fitness_tier ?? "beginner"}</span>
           </div>
         </div>
       )}
@@ -195,6 +208,28 @@ export default function Profile() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="field">
+          <label>Fitness tier</label>
+          <div className="tier-grid">
+            {TIERS.map((t) => (
+              <button
+                type="button"
+                key={t.value}
+                className={`tier-card ${form.fitness_tier === t.value ? "tier-card-selected" : ""}`}
+                onClick={() => setForm({ ...form, fitness_tier: t.value })}
+              >
+                <span className="tier-label">{t.label}</span>
+                <span className="tier-blurb">{t.blurb}</span>
+              </button>
+            ))}
+          </div>
+          <p className="field-hint">
+            Workout feeling too easy? Level up here for more sets, reps, and hold time. For
+            athletes under 16, exercise difficulty is automatically capped for safety regardless
+            of tier.
+          </p>
         </div>
 
         <div className="grid-2">
