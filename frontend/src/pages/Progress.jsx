@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
+import { useChartColors } from "../lib/chartColors";
 import "./Progress.css";
 
 const METRIC_FIELDS = [
@@ -25,7 +26,7 @@ function ChartTooltip({ active, payload, label, unit }) {
   );
 }
 
-function MetricChart({ title, unit, data, dataKey, targetValue }) {
+function MetricChart({ title, unit, data, dataKey, targetValue, colors }) {
   const points = data.filter((d) => d[dataKey] != null);
   if (points.length === 0) return null;
 
@@ -35,14 +36,14 @@ function MetricChart({ title, unit, data, dataKey, targetValue }) {
       <div className="chart-wrap">
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={points} margin={{ top: 16, right: 16, left: -20, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="#ece5d8" />
-            <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#736c60" }} axisLine={{ stroke: "#ece5d8" }} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: "#736c60" }} axisLine={false} tickLine={false} width={32} domain={["auto", "auto"]} />
+            <CartesianGrid vertical={false} stroke={colors.grid} />
+            <XAxis dataKey="label" tick={{ fontSize: 11, fill: colors.axisText }} axisLine={{ stroke: colors.grid }} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: colors.axisText }} axisLine={false} tickLine={false} width={32} domain={["auto", "auto"]} />
             <Tooltip content={<ChartTooltip unit={unit} />} />
             {targetValue && (
-              <ReferenceLine y={targetValue} stroke="#2fb673" strokeDasharray="4 4" label={{ value: "target", fontSize: 10, fill: "#2fb673" }} />
+              <ReferenceLine y={targetValue} stroke={colors.success} strokeDasharray="4 4" label={{ value: "target", fontSize: 10, fill: colors.success }} />
             )}
-            <Line type="monotone" dataKey={dataKey} stroke="#ff5a36" strokeWidth={2.5} dot={{ r: 3, fill: "#ff5a36" }} />
+            <Line type="monotone" dataKey={dataKey} stroke={colors.accent} strokeWidth={2.5} dot={{ r: 3, fill: colors.accent }} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -59,6 +60,7 @@ export default function Progress() {
   const [form, setForm] = useState({ weight_kg: "", waist_cm: "", chest_cm: "", hips_cm: "", arm_cm: "", notes: "" });
 
   const isPremium = Boolean(user?.has_premium);
+  const chartColors = useChartColors();
 
   useEffect(() => {
     if (!isPremium) {
@@ -171,11 +173,11 @@ export default function Progress() {
         <p className="empty-state">No entries yet - log your first measurement above to start your chart.</p>
       ) : (
         <div className="metric-chart-grid">
-          <MetricChart title="Weight" unit="kg" data={chartData} dataKey="weight_kg" targetValue={user.target_weight_kg} />
-          <MetricChart title="Waist" unit="cm" data={chartData} dataKey="waist_cm" />
-          <MetricChart title="Chest" unit="cm" data={chartData} dataKey="chest_cm" />
-          <MetricChart title="Hips" unit="cm" data={chartData} dataKey="hips_cm" />
-          <MetricChart title="Arm" unit="cm" data={chartData} dataKey="arm_cm" />
+          <MetricChart title="Weight" unit="kg" data={chartData} dataKey="weight_kg" targetValue={user.target_weight_kg} colors={chartColors} />
+          <MetricChart title="Waist" unit="cm" data={chartData} dataKey="waist_cm" colors={chartColors} />
+          <MetricChart title="Chest" unit="cm" data={chartData} dataKey="chest_cm" colors={chartColors} />
+          <MetricChart title="Hips" unit="cm" data={chartData} dataKey="hips_cm" colors={chartColors} />
+          <MetricChart title="Arm" unit="cm" data={chartData} dataKey="arm_cm" colors={chartColors} />
         </div>
       )}
     </div>

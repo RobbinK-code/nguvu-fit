@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { api } from "../lib/api";
 import { buildWeeklyVolume } from "../lib/progress";
+import { useChartColors } from "../lib/chartColors";
 import "./History.css";
 
 function ChartTooltip({ active, payload, label }) {
@@ -19,6 +20,7 @@ export default function History() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const chartColors = useChartColors();
 
   useEffect(() => {
     async function load() {
@@ -60,22 +62,22 @@ export default function History() {
           <div className="chart-wrap">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={weeklyVolume} margin={{ top: 16, right: 8, left: -20, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="#ece5d8" />
+                <CartesianGrid vertical={false} stroke={chartColors.grid} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 11, fill: "#736c60" }}
-                  axisLine={{ stroke: "#ece5d8" }}
+                  tick={{ fontSize: 11, fill: chartColors.axisText }}
+                  axisLine={{ stroke: chartColors.grid }}
                   tickLine={false}
                 />
                 <YAxis
                   allowDecimals={false}
-                  tick={{ fontSize: 11, fill: "#736c60" }}
+                  tick={{ fontSize: 11, fill: chartColors.axisText }}
                   axisLine={false}
                   tickLine={false}
                   width={24}
                 />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255, 90, 54, 0.06)" }} />
-                <Bar dataKey="sessions" fill="#ff5a36" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                <Bar dataKey="sessions" fill={chartColors.accent} radius={[4, 4, 0, 0]} maxBarSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </div>

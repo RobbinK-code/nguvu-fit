@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
+import ThemeToggle from "./ThemeToggle";
 import "./NavBar.css";
 
 export default function NavBar() {
@@ -27,6 +28,7 @@ export default function NavBar() {
             <Link to="/subscribe">Subscribe</Link>
             <Link to="/profile">Profile</Link>
             {user.is_admin && <Link to="/admin">Admin</Link>}
+            <ThemeToggle />
             <button className="btn btn-secondary nav-logout" onClick={handleLogout}>
               Log out
             </button>
@@ -34,6 +36,7 @@ export default function NavBar() {
         ) : (
           <nav className="nav-links">
             <Link to="/login">Log in</Link>
+            <ThemeToggle />
             <Link to="/register" className="btn btn-primary nav-cta">
               Get started
             </Link>
