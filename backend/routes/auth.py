@@ -3,7 +3,7 @@ from flask_jwt_extended import create_access_token
 from marshmallow import ValidationError
 from sqlalchemy.exc import IntegrityError
 
-from config import db
+from config import db, limiter
 from models import User
 from schemas import register_schema, login_schema, user_schema, forgot_password_schema, reset_password_schema
 from decorators import login_required, current_user
@@ -14,6 +14,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 @auth_bp.post("/register")
+@limiter.limit("10 per hour")
 def register():
     json_data = request.get_json(silent=True) or {}
     try:
@@ -42,6 +43,7 @@ def register():
 
 
 @auth_bp.post("/login")
+@limiter.limit("10 per minute")
 def login():
     json_data = request.get_json(silent=True) or {}
     try:
@@ -64,6 +66,7 @@ def me(user):
 
 
 @auth_bp.post("/forgot-password")
+@limiter.limit("5 per hour")
 def forgot_password():
     """Always returns the same generic response regardless of whether the
     email exists, to avoid leaking which addresses have accounts."""
@@ -101,6 +104,7 @@ def forgot_password():
 
 
 @auth_bp.post("/reset-password")
+@limiter.limit("10 per hour")
 def reset_password():
     json_data = request.get_json(silent=True) or {}
     try:

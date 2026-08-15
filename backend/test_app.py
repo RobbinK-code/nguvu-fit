@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime, timedelta
 
 from app import app
-from config import db
+from config import db, limiter
 from models import Exercise, Quote, User
 
 
@@ -10,6 +10,11 @@ from models import Exercise, Quote, User
 def client():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     app.config["TESTING"] = True
+    # Flask's test client sends every request from the same fake IP, so
+    # without this, all tests share one rate-limit bucket and later tests
+    # start failing once earlier ones exhaust it - not a real-world bug,
+    # just a test-environment artifact.
+    limiter.enabled = False
 
     with app.app_context():
         db.drop_all()
@@ -419,3 +424,53 @@ def test_hold_exercises_use_duration_not_reps(client):
     for ex in hold_exercises:
         assert ex["reps"] is None
         assert ex["duration_seconds"] is not None and ex["duration_seconds"] > 0
+
+
+def test_export_includes_profile_and_history(client):
+    headers = register(client, email="exportme@test.com")
+    client.patch("/profile", json={"height_cm": 180, "weight_kg": 80}, headers=headers)
+    client.post("/logs", json={"workout_name": "Day 1", "duration_minutes": 30}, headers=headers)
+
+    resp = client.get("/profile/export", headers=headers)
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["profile"]["email"] == "exportme@test.com"
+    assert len(data["workout_logs"]) == 1
+    assert "body_metric_logs" in data
+    assert "payments" in data
+
+
+def test_delete_account_requires_correct_password(client):
+    headers = register(client, email="deleteme@test.com")
+    resp = client.delete("/profile", json={"password": "wrongpassword"}, headers=headers)
+    assert resp.status_code == 401
+
+    # account should still exist and be usable
+    resp = client.post("/auth/login", json={"email": "deleteme@test.com", "password": "password123"})
+    assert resp.status_code == 200
+
+
+def test_delete_account_succeeds_with_correct_password(client):
+    headers = register(client, email="deleteforreal@test.com")
+    resp = client.delete("/profile", json={"password": "password123"}, headers=headers)
+    assert resp.status_code == 204
+
+    resp = client.post(
+        "/auth/login", json={"email": "deleteforreal@test.com", "password": "password123"}
+    )
+    assert resp.status_code == 401
+
+
+def test_rate_limit_blocks_excessive_login_attempts(client):
+    # This test deliberately re-enables the limiter (disabled globally for
+    # the rest of the suite) to prove it actually functions.
+    limiter.enabled = True
+    try:
+        client.post("/auth/register", json={"email": "ratelimited@test.com", "password": "password123", "name": "R"})
+        responses = [
+            client.post("/auth/login", json={"email": "ratelimited@test.com", "password": "wrong"})
+            for _ in range(11)
+        ]
+        assert any(r.status_code == 429 for r in responses)
+    finally:
+        limiter.enabled = False

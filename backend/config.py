@@ -6,9 +6,29 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from sqlalchemy import MetaData
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+# Error monitoring - only activates if SENTRY_DSN is set (get one free at
+# sentry.io). Wrapped in a try/except so a bad DSN or network hiccup at
+# startup never prevents the app itself from booting.
+sentry_dsn = os.environ.get("SENTRY_DSN")
+if sentry_dsn:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+
+        sentry_sdk.init(
+            dsn=sentry_dsn,
+            integrations=[FlaskIntegration()],
+            traces_sample_rate=0.1,
+            environment=os.environ.get("SENTRY_ENVIRONMENT", "production"),
+        )
+    except Exception as err:
+        print(f"[sentry] Could not initialize: {err}")
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -36,6 +56,17 @@ db = SQLAlchemy(metadata=metadata)
 db.init_app(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
+
+# In-memory storage is fine here: Render's free/starter plan runs a single
+# worker process (WEB_CONCURRENCY=1 in render.yaml), so there's only ever
+# one counter to keep in sync. If you scale to multiple workers/instances
+# later, swap storage_uri to a shared Redis instance instead.
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memory://",
+)
 
 CORS(
     app,

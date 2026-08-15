@@ -142,6 +142,16 @@ class BodyMetricLogSchema(Schema):
             raise ValidationError("Provide at least one measurement.", "weight_kg")
 
 
+class PaymentExportSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    amount = fields.Integer(dump_only=True)
+    phone_number = fields.String(dump_only=True)
+    plan = fields.String(dump_only=True)
+    status = fields.String(dump_only=True)
+    mpesa_receipt = fields.String(dump_only=True)
+    created_at = fields.DateTime(dump_only=True)
+
+
 class STKPushSchema(Schema):
     phone_number = fields.String(required=True, validate=validate.Regexp(r"^254[71]\d{8}$",
                                   error="phone_number must be a Safaricom number in the format 2547XXXXXXXX or 2541XXXXXXXX."))
@@ -165,3 +175,4 @@ quote_schema = QuoteSchema()
 stk_push_schema = STKPushSchema()
 body_metric_log_schema = BodyMetricLogSchema()
 body_metric_logs_schema = BodyMetricLogSchema(many=True)
+payment_export_schema = PaymentExportSchema(many=True)
