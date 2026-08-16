@@ -329,3 +329,36 @@
     grid-template-columns: 1fr;
   }
 }
+
+.hero-fade-in {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroFadeIn 0.7s ease forwards;
+}
+
+.hero-fade-in-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.hero-fade-in-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.hero-fade-in-delay-3 {
+  animation-delay: 0.3s;
+}
+
+@keyframes heroFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade-in {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}

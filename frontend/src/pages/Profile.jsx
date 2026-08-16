@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
+import ConfirmDialog from "../components/ConfirmDialog";
 import "./Onboarding.css";
 import "./Profile.css";
 
@@ -37,6 +38,8 @@ export default function Profile() {
   const [busy, setBusy] = useState(false);
 
   const [exporting, setExporting] = useState(false);
+  const [exportConfirmOpen, setExportConfirmOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState(null);
@@ -107,6 +110,7 @@ export default function Profile() {
   }
 
   async function handleExport() {
+    setExportConfirmOpen(false);
     setExporting(true);
     try {
       const data = await api.exportProfileData();
@@ -314,7 +318,7 @@ export default function Profile() {
               measurements, and payment records - as a JSON file.
             </p>
           </div>
-          <button className="btn btn-secondary" onClick={handleExport} disabled={exporting}>
+          <button className="btn btn-secondary" onClick={() => setExportConfirmOpen(true)} disabled={exporting}>
             {exporting ? "Preparing…" : "Export my data"}
           </button>
         </div>
@@ -327,7 +331,7 @@ export default function Profile() {
             </p>
           </div>
           {!deleteOpen ? (
-            <button className="btn btn-secondary btn-danger" onClick={() => setDeleteOpen(true)}>
+            <button className="btn btn-secondary btn-danger" onClick={() => setDeleteConfirmOpen(true)}>
               Delete my account
             </button>
           ) : (
@@ -360,6 +364,29 @@ export default function Profile() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={exportConfirmOpen}
+        title="Export your data?"
+        message="This downloads a JSON file with your profile, workout history, measurements, and payment records."
+        confirmLabel="Download"
+        busy={exporting}
+        onConfirm={handleExport}
+        onCancel={() => setExportConfirmOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="Delete your account?"
+        message="This permanently removes your account and everything tied to it - your plan, history, and measurements. This can't be undone."
+        confirmLabel="Yes, continue"
+        danger
+        onConfirm={() => {
+          setDeleteConfirmOpen(false);
+          setDeleteOpen(true);
+        }}
+        onCancel={() => setDeleteConfirmOpen(false)}
+      />
     </div>
   );
 }

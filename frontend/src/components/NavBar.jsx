@@ -1,15 +1,19 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
 import ThemeToggle from "./ThemeToggle";
+import ConfirmDialog from "./ConfirmDialog";
 import "./NavBar.css";
 
 export default function NavBar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
 
   function handleLogout() {
     logout();
     navigate("/");
+    setConfirmLogoutOpen(false);
   }
 
   return (
@@ -29,7 +33,10 @@ export default function NavBar() {
             <Link to="/profile">Profile</Link>
             {user.is_admin && <Link to="/admin">Admin</Link>}
             <ThemeToggle />
-            <button className="btn btn-secondary nav-logout" onClick={handleLogout}>
+            <button
+              className="btn btn-secondary nav-logout"
+              onClick={() => setConfirmLogoutOpen(true)}
+            >
               Log out
             </button>
           </nav>
@@ -43,6 +50,15 @@ export default function NavBar() {
           </nav>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmLogoutOpen}
+        title="Log out?"
+        message="You'll need to log back in to see your dashboard, plan, and progress."
+        confirmLabel="Log out"
+        onConfirm={handleLogout}
+        onCancel={() => setConfirmLogoutOpen(false)}
+      />
     </header>
   );
 }

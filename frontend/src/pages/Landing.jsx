@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Reveal from "../components/Reveal";
 import "./Landing.css";
 
 // Fill these in once you have real reviews - the section only renders
@@ -78,18 +79,18 @@ export default function Landing() {
   return (
     <div className="landing">
       <section className="hero container">
-        <p className="mono hero-eyebrow">HOME TRAINING, NO EQUIPMENT NEEDED</p>
-        <h1 className="hero-title">
+        <p className="mono hero-eyebrow hero-fade-in">HOME TRAINING, NO EQUIPMENT NEEDED</p>
+        <h1 className="hero-title hero-fade-in hero-fade-in-delay-1">
           Train with
           <br />
           <span className="hero-title-accent">Nguvu.</span>
         </h1>
-        <p className="hero-sub">
+        <p className="hero-sub hero-fade-in hero-fade-in-delay-2">
           A plan built around your body, your goal, and your kitchen floor.
           Track every session, get a fresh reason to show up each day, and
           watch the number move.
         </p>
-        <div className="hero-actions">
+        <div className="hero-actions hero-fade-in hero-fade-in-delay-3">
           <Link to="/register" className="btn btn-primary">
             Start training free
           </Link>
@@ -108,37 +109,34 @@ export default function Landing() {
       </div>
 
       <section className="container steps">
-        <div className="step">
-          <span className="step-index mono">01</span>
-          <h3>Tell us where you're starting</h3>
-          <p>Height, weight, goal, equipment - takes under a minute.</p>
-        </div>
-        <div className="step">
-          <span className="step-index mono">02</span>
-          <h3>Get your weekly plan</h3>
-          <p>
-            Bodyweight or gym gear, built around the muscle groups you want
-            to hit hardest.
-          </p>
-        </div>
-        <div className="step">
-          <span className="step-index mono">03</span>
-          <h3>Log it, see it add up</h3>
-          <p>Every session logged. Every week, proof you showed up.</p>
-        </div>
+        {[
+          { n: "01", title: "Tell us where you're starting", copy: "Height, weight, goal, equipment - takes under a minute." },
+          { n: "02", title: "Get your weekly plan", copy: "Bodyweight or gym gear, built around the muscle groups you want to hit hardest." },
+          { n: "03", title: "Log it, see it add up", copy: "Every session logged. Every week, proof you showed up." },
+        ].map((s, i) => (
+          <Reveal key={s.n} delay={i * 100} className="step">
+            <span className="step-index mono">{s.n}</span>
+            <h3>{s.title}</h3>
+            <p>{s.copy}</p>
+          </Reveal>
+        ))}
       </section>
 
       <section className="section-block">
         <div className="container">
-          <p className="mono section-eyebrow">PICK YOUR GOAL</p>
-          <h2 className="section-heading">Every plan starts with what you want.</h2>
+          <Reveal>
+            <p className="mono section-eyebrow">PICK YOUR GOAL</p>
+            <h2 className="section-heading">Every plan starts with what you want.</h2>
+          </Reveal>
           <div className="goal-grid">
-            {GOALS.map((g) => (
-              <Link to="/register" key={g.value} className="goal-card">
-                <h3>{g.title}</h3>
-                <p>{g.copy}</p>
-                <span className="goal-cta mono">Start here →</span>
-              </Link>
+            {GOALS.map((g, i) => (
+              <Reveal key={g.value} delay={i * 80}>
+                <Link to="/register" className="goal-card">
+                  <h3>{g.title}</h3>
+                  <p>{g.copy}</p>
+                  <span className="goal-cta mono">Start here →</span>
+                </Link>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -146,14 +144,16 @@ export default function Landing() {
 
       <section className="section-block section-block-alt">
         <div className="container">
-          <p className="mono section-eyebrow">WHY NGUVU FIT</p>
-          <h2 className="section-heading">Built to fit an actual life.</h2>
+          <Reveal>
+            <p className="mono section-eyebrow">WHY NGUVU FIT</p>
+            <h2 className="section-heading">Built to fit an actual life.</h2>
+          </Reveal>
           <div className="feature-grid">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="feature-item">
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.title} delay={i * 80} className="feature-item">
                 <h3>{f.title}</h3>
                 <p>{f.copy}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -181,25 +181,29 @@ export default function Landing() {
 
       <section className="section-block section-block-alt">
         <div className="container">
-          <p className="mono section-eyebrow">QUESTIONS</p>
-          <h2 className="section-heading">Before you start.</h2>
-          <div className="faq-list">
-            {FAQ.map((item) => (
-              <details key={item.q} className="faq-item">
-                <summary>{item.q}</summary>
-                <p>{item.a}</p>
-              </details>
-            ))}
-          </div>
+          <Reveal>
+            <p className="mono section-eyebrow">QUESTIONS</p>
+            <h2 className="section-heading">Before you start.</h2>
+          </Reveal>
+          <Reveal delay={100}>
+            <div className="faq-list">
+              {FAQ.map((item) => (
+                <details key={item.q} className="faq-item">
+                  <summary>{item.q}</summary>
+                  <p>{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      <section className="closing-cta container">
+      <Reveal className="closing-cta container">
         <h2>Your first session is one tap away.</h2>
         <Link to="/register" className="btn btn-primary">
           Start training free
         </Link>
-      </section>
+      </Reveal>
     </div>
   );
 }
