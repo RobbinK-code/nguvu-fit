@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 import "./Onboarding.css";
@@ -28,11 +29,18 @@ const TIERS = [
 ];
 
 export default function Profile() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState(null);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const [exporting, setExporting] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -95,6 +103,41 @@ export default function Profile() {
       setError(err.message);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const data = await api.exportProfileData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `nguvu-fit-data-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleDeleteAccount(e) {
+    e.preventDefault();
+    setDeleteError(null);
+    setDeleting(true);
+    try {
+      await api.deleteAccount(deletePassword);
+      logout();
+      navigate("/");
+    } catch (err) {
+      setDeleteError(err.message);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -259,6 +302,64 @@ export default function Profile() {
           {busy ? "Saving…" : "Save changes"}
         </button>
       </form>
+
+      <div className="card danger-zone">
+        <h3 className="danger-zone-title">Account data</h3>
+
+        <div className="danger-zone-row">
+          <div>
+            <p className="danger-zone-label">Export your data</p>
+            <p className="danger-zone-copy">
+              Download everything Nguvu Fit holds about you - profile, workout history,
+              measurements, and payment records - as a JSON file.
+            </p>
+          </div>
+          <button className="btn btn-secondary" onClick={handleExport} disabled={exporting}>
+            {exporting ? "Preparing…" : "Export my data"}
+          </button>
+        </div>
+
+        <div className="danger-zone-row danger-zone-row-delete">
+          <div>
+            <p className="danger-zone-label danger-zone-label-danger">Delete account</p>
+            <p className="danger-zone-copy">
+              Permanently deletes your account and all associated data. This can't be undone.
+            </p>
+          </div>
+          {!deleteOpen ? (
+            <button className="btn btn-secondary btn-danger" onClick={() => setDeleteOpen(true)}>
+              Delete my account
+            </button>
+          ) : (
+            <form className="danger-zone-confirm" onSubmit={handleDeleteAccount}>
+              <input
+                type="password"
+                required
+                placeholder="Confirm your password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+              />
+              <div className="danger-zone-confirm-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setDeleteOpen(false);
+                    setDeletePassword("");
+                    setDeleteError(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-danger" disabled={deleting}>
+                  {deleting ? "Deleting…" : "Permanently delete"}
+                </button>
+              </div>
+              {deleteError && <p className="error-text">{deleteError}</p>}
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

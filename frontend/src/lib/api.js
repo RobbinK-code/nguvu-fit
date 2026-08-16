@@ -60,6 +60,8 @@ export const api = {
 
   getProfile: () => request("/profile"),
   updateProfile: (payload) => request("/profile", { method: "PATCH", body: payload }),
+  exportProfileData: () => request("/profile/export"),
+  deleteAccount: (password) => request("/profile", { method: "DELETE", body: { password } }),
 
   getPlan: (days = 3, refresh = false) => request(`/plan?days=${days}${refresh ? "&refresh=1" : ""}`),
 
