@@ -1,3 +1,4 @@
+import PageLoading from "../components/PageLoading";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
@@ -46,7 +47,7 @@ export default function GymGuide() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [highlightGroup, data]);
 
-  if (loading) return <div className="page-loading container">Loading the gym guide…</div>;
+  if (loading) return <PageLoading message="Loading the gym guide…" />;
   if (error) return <p className="container error-text">{error}</p>;
 
   return (

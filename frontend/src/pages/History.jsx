@@ -1,3 +1,4 @@
+import PageLoading from "../components/PageLoading";
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { api } from "../lib/api";
@@ -37,7 +38,7 @@ export default function History() {
     load();
   }, []);
 
-  if (loading) return <div className="page-loading container">Loading history…</div>;
+  if (loading) return <PageLoading message="Loading history…" />;
 
   const weeklyVolume = buildWeeklyVolume(logs, 8);
 

@@ -1,3 +1,4 @@
+import PageLoading from "../components/PageLoading";
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
 import { Link } from "react-router-dom";
@@ -126,7 +127,7 @@ export default function Progress() {
     );
   }
 
-  if (loading) return <div className="page-loading container">Loading your progress…</div>;
+  if (loading) return <PageLoading message="Loading your progress…" />;
 
   const chartData = metrics.map((m) => ({
     label: new Date(m.recorded_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }),

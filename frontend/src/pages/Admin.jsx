@@ -1,3 +1,4 @@
+import PageLoading from "../components/PageLoading";
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
@@ -55,7 +56,7 @@ export default function Admin() {
     }
   }
 
-  if (loading) return <div className="page-loading container">Loading admin panel…</div>;
+  if (loading) return <PageLoading message="Loading admin panel…" />;
 
   return (
     <div className="container admin">

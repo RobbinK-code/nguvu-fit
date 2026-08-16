@@ -1,3 +1,4 @@
+import PageLoading from "../components/PageLoading";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
@@ -89,7 +90,7 @@ export default function Dashboard() {
     }
   }
 
-  if (loading) return <div className="page-loading container">Loading your plan…</div>;
+  if (loading) return <PageLoading message="Loading your plan…" />;
 
   if (plan?.needsProfile) {
     return (
