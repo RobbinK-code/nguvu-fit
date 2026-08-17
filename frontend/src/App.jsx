@@ -14,6 +14,7 @@ import Subscribe from "./pages/Subscribe";
 import Admin from "./pages/Admin";
 import GymGuide from "./pages/GymGuide";
 import Progress from "./pages/Progress";
+import WorkoutSession from "./pages/WorkoutSession";
 
 export default function App() {
   return (
@@ -78,6 +79,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Progress />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workout"
+          element={
+            <ProtectedRoute>
+              <WorkoutSession />
             </ProtectedRoute>
           }
         />

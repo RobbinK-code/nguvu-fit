@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 import { computeStreak, countThisWeek, MILESTONES } from "../lib/progress";
+import { useCloseOnHide } from "../lib/useCloseOnHide";
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [logged, setLogged] = useState({});
   const [logs, setLogs] = useState([]);
   const [openVideoKey, setOpenVideoKey] = useState(null);
+  useCloseOnHide(() => setOpenVideoKey(null));
 
   async function loadPlan(refresh = false) {
     if (refresh) setShuffling(true);
@@ -236,6 +238,13 @@ export default function Dashboard() {
               })}
             </ul>
             <button
+              className="btn btn-primary btn-block"
+              disabled={logged[day.day_number]}
+              onClick={() => navigate("/workout", { state: { day } })}
+            >
+              Start workout
+            </button>
+            <button
               className="btn btn-secondary btn-block"
               disabled={logging === day.day_number || logged[day.day_number]}
               onClick={() => handleLogDay(day)}
@@ -244,7 +253,7 @@ export default function Dashboard() {
                 ? "Logged ✓"
                 : logging === day.day_number
                 ? "Logging…"
-                : "Mark as done"}
+                : "Mark as done without guided mode"}
             </button>
           </div>
         ))}

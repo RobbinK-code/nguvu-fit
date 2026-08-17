@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 import EquipmentIcon from "../components/EquipmentIcon";
+import { useCloseOnHide } from "../lib/useCloseOnHide";
 import "./GymGuide.css";
 
 const GROUP_LABELS = {
@@ -26,6 +27,7 @@ export default function GymGuide() {
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
   const [openVideoId, setOpenVideoId] = useState(null);
+  useCloseOnHide(() => setOpenVideoId(null));
 
   useEffect(() => {
     async function load() {
