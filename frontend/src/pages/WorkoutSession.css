@@ -1,0 +1,135 @@
+.workout-session-page {
+  max-width: 480px;
+  padding: 32px 24px 80px;
+  min-height: calc(100vh - 68px);
+}
+
+.session-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.session-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sunrise), var(--gold));
+  transition: width 0.4s ease;
+}
+
+.session-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.session-counter {
+  color: var(--paper-dim);
+  font-size: 0.78rem;
+}
+
+.session-exit {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--paper-dim);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.session-exit:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.session-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 40px 28px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  animation: sessionCardIn 0.3s ease;
+}
+
+@keyframes sessionCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.session-label {
+  color: var(--sunrise-dim);
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+}
+
+.session-exercise-name {
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+}
+
+.session-timer {
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  margin: 8px 0 20px;
+}
+
+.session-reps {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  margin: 8px 0 24px;
+}
+
+.session-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.session-video-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.session-skip-link {
+  display: block;
+  margin: 16px auto 0;
+  background: none;
+  border: none;
+  color: var(--paper-dim);
+  font-size: 0.8rem;
+  text-decoration: underline;
+}
+
+.session-resting {
+  background: linear-gradient(160deg, rgba(255, 90, 54, 0.06), var(--surface) 60%);
+}
+
+.session-next-up {
+  color: var(--paper-dim);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.session-done-copy {
+  color: var(--paper-dim);
+  margin-bottom: 24px;
+}
