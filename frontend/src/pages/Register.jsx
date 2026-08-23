@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../lib/AuthContext";
 import PasswordField from "../components/PasswordField";
 import "./Auth.css";
@@ -7,7 +7,16 @@ import "./Auth.css";
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [searchParams] = useSearchParams();
+  const refFromLink = searchParams.get("ref") || "";
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    referralCode: refFromLink,
+  });
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -25,7 +34,7 @@ export default function Register() {
 
     setBusy(true);
     try {
-      await register(form.email, form.password, form.name);
+      await register(form.email, form.password, form.name, form.referralCode.trim());
       navigate("/onboarding");
     } catch (err) {
       setError(err.message);
@@ -38,6 +47,12 @@ export default function Register() {
     <div className="auth-page container">
       <div className="auth-card card">
         <h2 className="auth-title">Create your account</h2>
+        {refFromLink && (
+          <p className="referral-applied-hint">
+            You're signing up with a friend's invite - you'll both get 7 days of premium once you
+            subscribe.
+          </p>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="field">
             <label htmlFor="name">Name</label>
@@ -80,6 +95,18 @@ export default function Register() {
             <p className={`password-match-hint ${showMismatch ? "mismatch" : "match"}`}>
               {showMismatch ? "Passwords don't match yet." : "Passwords match."}
             </p>
+          )}
+
+          {!refFromLink && (
+            <div className="field">
+              <label htmlFor="referralCode">Referral code (optional)</label>
+              <input
+                id="referralCode"
+                placeholder="e.g. AB12CD34"
+                value={form.referralCode}
+                onChange={(e) => setForm({ ...form, referralCode: e.target.value.toUpperCase() })}
+              />
+            </div>
           )}
 
           {error && <p className="error-text">{error}</p>}

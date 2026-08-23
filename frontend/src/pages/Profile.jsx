@@ -44,6 +44,19 @@ export default function Profile() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const referralLink = user?.referral_code
+    ? `${window.location.origin}/register?ref=${user.referral_code}`
+    : null;
+
+  function handleCopyReferralLink() {
+    if (!referralLink) return;
+    navigator.clipboard.writeText(referralLink).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   useEffect(() => {
     if (user) {
@@ -306,6 +319,24 @@ export default function Profile() {
           {busy ? "Saving…" : "Save changes"}
         </button>
       </form>
+
+      <div className="card referral-card">
+        <h3 className="danger-zone-title">Invite a friend</h3>
+        <p className="danger-zone-copy referral-copy">
+          Share your link - when a friend you invite subscribes, you both get 7 days of premium
+          free.
+        </p>
+        {referralLink ? (
+          <div className="referral-link-row">
+            <input className="referral-link-input" readOnly value={referralLink} onClick={(e) => e.target.select()} />
+            <button className="btn btn-primary" onClick={handleCopyReferralLink}>
+              {copied ? "Copied!" : "Copy link"}
+            </button>
+          </div>
+        ) : (
+          <p className="danger-zone-copy">Your referral link will appear here.</p>
+        )}
+      </div>
 
       <div className="card danger-zone">
         <h3 className="danger-zone-title">Account data</h3>

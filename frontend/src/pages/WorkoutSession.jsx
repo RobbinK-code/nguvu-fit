@@ -3,6 +3,8 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import { api } from "../lib/api";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useCloseOnHide } from "../lib/useCloseOnHide";
+import { useOnlineStatus } from "../lib/useOnlineStatus";
+import { queueLogWorkout } from "../lib/offlineQueue";
 import "./WorkoutSession.css";
 
 const REST_SECONDS = 30;
@@ -40,6 +42,7 @@ export default function WorkoutSession() {
   const [saveError, setSaveError] = useState(null);
   const [videoOpen, setVideoOpen] = useState(false);
   useCloseOnHide(() => setVideoOpen(false));
+  const isOnline = useOnlineStatus();
 
   const startTimeRef = useRef(Date.now());
 
@@ -111,14 +114,25 @@ export default function WorkoutSession() {
     setSaving(true);
     setSaveError(null);
     const elapsedMinutes = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 60000));
+    const payload = {
+      workout_name: `Day ${day.day_number} - ${day.focus}`,
+      duration_minutes: elapsedMinutes,
+    };
+
+    if (!isOnline) {
+      queueLogWorkout(payload);
+      navigate("/dashboard");
+      return;
+    }
+
     try {
-      await api.logWorkout({
-        workout_name: `Day ${day.day_number} - ${day.focus}`,
-        duration_minutes: elapsedMinutes,
-      });
+      await api.logWorkout(payload);
       navigate("/dashboard");
     } catch (err) {
-      setSaveError(err.message);
+      // Network-level failure (e.g. connection dropped mid-request) -
+      // queue it rather than losing the session's progress.
+      queueLogWorkout(payload);
+      navigate("/dashboard");
     } finally {
       setSaving(false);
     }

@@ -305,3 +305,19 @@
 .milestone-badge::before {
   content: "✓";
 }
+
+.offline-banner {
+  background: rgba(242, 166, 61, 0.12);
+  border: 1px solid rgba(242, 166, 61, 0.35);
+  color: var(--gold);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+
+.offline-banner-success {
+  background: rgba(47, 182, 115, 0.12);
+  border-color: rgba(47, 182, 115, 0.35);
+  color: #1f8a56;
+}

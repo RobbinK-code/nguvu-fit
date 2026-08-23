@@ -34,8 +34,10 @@ export function AuthProvider({ children }) {
     setUser(data.user);
   }
 
-  async function register(email, password, name) {
-    const data = await api.register({ email, password, name });
+  async function register(email, password, name, referralCode) {
+    const payload = { email, password, name };
+    if (referralCode) payload.referral_code = referralCode;
+    const data = await api.register(payload);
     setToken(data.token);
     setUser(data.user);
   }

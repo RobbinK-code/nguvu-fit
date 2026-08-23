@@ -37,11 +37,25 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Cache the app shell so it opens instantly on repeat visits;
-        // API calls (auth, plan, etc.) are never cached since they need
-        // to always hit the live backend.
+        // Cache the app shell so it opens instantly on repeat visits.
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
         navigateFallbackDenylist: [/^\/(auth|profile|plan|exercises|logs|quotes|payments|admin|equipment|metrics)/],
+        runtimeCaching: [
+          {
+            // Today's plan and quote: try the network first (always want
+            // fresh data when online), but fall back to the last
+            // successful response when offline - matched by path only
+            // so this works regardless of which backend host is set via
+            // VITE_API_URL.
+            urlPattern: ({ url }) => url.pathname === '/plan' || url.pathname === '/quotes/today',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'nguvu-offline-plan',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
+          },
+        ],
       },
     }),
   ],

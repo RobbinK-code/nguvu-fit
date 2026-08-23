@@ -5,6 +5,8 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 import { computeStreak, countThisWeek, MILESTONES } from "../lib/progress";
 import { useCloseOnHide } from "../lib/useCloseOnHide";
+import { useOnlineStatus } from "../lib/useOnlineStatus";
+import { queueLogWorkout, flushLogQueue, pendingQueueCount } from "../lib/offlineQueue";
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -20,6 +22,16 @@ export default function Dashboard() {
   const [logs, setLogs] = useState([]);
   const [openVideoKey, setOpenVideoKey] = useState(null);
   useCloseOnHide(() => setOpenVideoKey(null));
+  const isOnline = useOnlineStatus();
+  const [syncedCount, setSyncedCount] = useState(0);
+
+  useEffect(() => {
+    if (!isOnline) return;
+    if (pendingQueueCount() === 0) return;
+    flushLogQueue().then((count) => {
+      if (count > 0) setSyncedCount(count);
+    });
+  }, [isOnline]);
 
   async function loadPlan(refresh = false) {
     if (refresh) setShuffling(true);
@@ -78,15 +90,31 @@ export default function Dashboard() {
 
   async function handleLogDay(day) {
     setLogging(day.day_number);
+    const payload = {
+      workout_name: `Day ${day.day_number} - ${day.focus}`,
+      duration_minutes: 30,
+    };
+
+    if (!isOnline) {
+      queueLogWorkout(payload);
+      setLogged((l) => ({ ...l, [day.day_number]: true }));
+      setLogging(null);
+      return;
+    }
+
     try {
-      const newLog = await api.logWorkout({
-        workout_name: `Day ${day.day_number} - ${day.focus}`,
-        duration_minutes: 30,
-      });
+      const newLog = await api.logWorkout(payload);
       setLogged((l) => ({ ...l, [day.day_number]: true }));
       setLogs((prev) => [newLog, ...prev]);
     } catch (err) {
-      setError(err.message);
+      // Network-level failure (e.g. connection dropped mid-request) -
+      // queue it rather than losing the log entirely.
+      if (err.message === "Failed to fetch" || err.name === "TypeError") {
+        queueLogWorkout(payload);
+        setLogged((l) => ({ ...l, [day.day_number]: true }));
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLogging(null);
     }
@@ -108,6 +136,19 @@ export default function Dashboard() {
 
   return (
     <div className="container dashboard">
+      {!isOnline && (
+        <div className="offline-banner">
+          You're offline - showing your last saved plan and quote. Logging workouts will sync once
+          you're back online.
+        </div>
+      )}
+
+      {isOnline && syncedCount > 0 && (
+        <div className="offline-banner offline-banner-success">
+          Synced {syncedCount} workout{syncedCount === 1 ? "" : "s"} logged while you were offline.
+        </div>
+      )}
+
       {quote && (
         <div className="quote-strip">
           <p className="quote-text">"{quote.text}"</p>
