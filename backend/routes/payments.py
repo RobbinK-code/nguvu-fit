@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify
 from marshmallow import ValidationError
 
 from config import db
-from models import Payment
+from models import Payment, User
 from schemas import stk_push_schema
 from decorators import login_required
 import mpesa
@@ -63,6 +63,18 @@ def subscribe(user):
     ), 202
 
 
+REFERRAL_REWARD_DAYS = 7
+
+
+def _extend_premium(user, days):
+    """Adds `days` of premium on top of whatever the user already has,
+    rather than overwriting a longer existing subscription."""
+    now = datetime.utcnow()
+    base = user.subscription_expires_at if (user.subscription_expires_at and user.subscription_expires_at > now) else now
+    user.subscription_status = "active"
+    user.subscription_expires_at = base + timedelta(days=days)
+
+
 @payments_bp.post("/callback")
 def mpesa_callback():
     """Public webhook Safaricom calls once the STK push is approved/declined.
@@ -75,10 +87,21 @@ def mpesa_callback():
         return jsonify({"error": "Unknown checkout_request_id."}), 404
 
     if success:
+        is_first_successful_payment = (
+            Payment.query.filter_by(user_id=payment.user_id, status="success").count() == 0
+        )
+
         payment.status = "success"
         payment.mpesa_receipt = receipt
         payment.user.subscription_status = "active"
         payment.user.subscription_expires_at = datetime.utcnow() + PLAN_DURATIONS[payment.plan]
+
+        if is_first_successful_payment and payment.user.referred_by_id and not payment.user.referral_reward_granted:
+            referrer = db.session.get(User, payment.user.referred_by_id)
+            if referrer:
+                _extend_premium(referrer, REFERRAL_REWARD_DAYS)
+                _extend_premium(payment.user, REFERRAL_REWARD_DAYS)
+                payment.user.referral_reward_granted = True
     else:
         payment.status = "failed"
 

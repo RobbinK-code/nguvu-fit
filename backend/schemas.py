@@ -7,6 +7,7 @@ class RegisterSchema(Schema):
     email = fields.Email(required=True)
     password = fields.String(required=True, validate=validate.Length(min=8, max=128))
     name = fields.String(required=True, validate=validate.Length(min=1, max=100))
+    referral_code = fields.String(required=False, allow_none=True, validate=validate.Length(max=20))
 
 
 class LoginSchema(Schema):
@@ -59,6 +60,7 @@ class UserSchema(Schema):
     subscription_status = fields.String(dump_only=True)
     subscription_expires_at = fields.DateTime(dump_only=True)
     has_premium = fields.Method("get_has_premium", dump_only=True)
+    referral_code = fields.String(dump_only=True)
 
     def get_has_premium(self, obj):
         return obj.has_active_subscription()

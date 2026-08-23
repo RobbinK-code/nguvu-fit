@@ -31,7 +31,18 @@ def register():
     except ValueError as err:
         return jsonify({"errors": {"password": [str(err)]}}), 400
 
+    referral_code = (data.get("referral_code") or "").strip().upper()
+    if referral_code:
+        referrer = User.query.filter_by(referral_code=referral_code).first()
+        if referrer:
+            user.referred_by_id = referrer.id
+        # An unrecognized code is silently ignored rather than blocking
+        # registration - a mistyped code shouldn't stop someone signing up.
+
     db.session.add(user)
+    db.session.flush()  # assigns user.id, needed before generating its own code
+    user.referral_code = User.generate_unique_referral_code()
+
     try:
         db.session.commit()
     except IntegrityError as err:

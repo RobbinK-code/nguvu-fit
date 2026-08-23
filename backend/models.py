@@ -50,11 +50,16 @@ class User(db.Model):
     reset_token = db.Column(db.String, unique=True)
     reset_token_expires_at = db.Column(db.DateTime)
 
+    referral_code = db.Column(db.String, unique=True)
+    referred_by_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    referral_reward_granted = db.Column(db.Boolean, default=False, nullable=False)
+
     created_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
 
     workout_logs = db.relationship("WorkoutLog", back_populates="user", cascade="all, delete-orphan")
     payments = db.relationship("Payment", back_populates="user", cascade="all, delete-orphan")
     body_metric_logs = db.relationship("BodyMetricLog", back_populates="user", cascade="all, delete-orphan")
+    referred_users = db.relationship("User", backref=db.backref("referred_by", remote_side="User.id"))
 
     @validates("email")
     def validate_email(self, key, value):
@@ -90,6 +95,23 @@ class User(db.Model):
         if not raw_password or len(raw_password) < 8:
             raise ValueError("Password must be at least 8 characters.")
         self.password_hash = generate_password_hash(raw_password)
+
+    @staticmethod
+    def generate_unique_referral_code():
+        """An 8-character code, retried on the rare collision. Not a
+        security token - just needs to be easy to type/share, so it uses
+        a readable alphabet rather than a long random string."""
+        import secrets
+        import string
+
+        alphabet = string.ascii_uppercase + string.digits
+        for _ in range(10):
+            code = "".join(secrets.choice(alphabet) for _ in range(8))
+            if not User.query.filter_by(referral_code=code).first():
+                return code
+        # Astronomically unlikely to ever hit this, but fail loudly rather
+        # than silently return a colliding code if it somehow does.
+        raise RuntimeError("Could not generate a unique referral code.")
 
     def check_password(self, raw_password):
         return check_password_hash(self.password_hash, raw_password)

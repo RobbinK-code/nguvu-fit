@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from app import app
 from config import db, limiter
-from models import Exercise, Quote, User
+from models import Exercise, Quote, User, Payment
 
 
 @pytest.fixture
@@ -35,8 +35,11 @@ def client():
         db.drop_all()
 
 
-def register(client, email="user@test.com"):
-    resp = client.post("/auth/register", json={"email": email, "password": "password123", "name": "Test"})
+def register(client, email="user@test.com", referral_code=None):
+    payload = {"email": email, "password": "password123", "name": "Test"}
+    if referral_code:
+        payload["referral_code"] = referral_code
+    resp = client.post("/auth/register", json=payload)
     token = resp.get_json()["token"]
     return {"Authorization": f"Bearer {token}"}
 
@@ -474,3 +477,130 @@ def test_rate_limit_blocks_excessive_login_attempts(client):
         assert any(r.status_code == 429 for r in responses)
     finally:
         limiter.enabled = False
+
+
+def _fake_mpesa_callback_body(checkout_id, amount=300):
+    return {
+        "Body": {
+            "stkCallback": {
+                "CheckoutRequestID": checkout_id,
+                "ResultCode": 0,
+                "CallbackMetadata": {
+                    "Item": [
+                        {"Name": "MpesaReceiptNumber", "Value": "TEST12345"},
+                        {"Name": "Amount", "Value": amount},
+                    ]
+                },
+            }
+        }
+    }
+
+
+def test_registration_generates_unique_referral_code(client):
+    headers = register(client, email="referrer@test.com")
+    me = client.get("/auth/me", headers=headers).get_json()
+    assert me["referral_code"] is not None
+    assert len(me["referral_code"]) == 8
+
+
+def test_valid_referral_code_links_accounts(client):
+    referrer_headers = register(client, email="referrer2@test.com")
+    referrer = client.get("/auth/me", headers=referrer_headers).get_json()
+
+    resp = client.post(
+        "/auth/register",
+        json={
+            "email": "referee@test.com",
+            "password": "password123",
+            "name": "Referee",
+            "referral_code": referrer["referral_code"],
+        },
+    )
+    assert resp.status_code == 201
+
+    with app.app_context():
+        referee = User.query.filter_by(email="referee@test.com").first()
+        assert referee.referred_by_id == referrer["id"]
+
+
+def test_unrecognized_referral_code_does_not_block_registration(client):
+    resp = client.post(
+        "/auth/register",
+        json={
+            "email": "nocode@test.com",
+            "password": "password123",
+            "name": "NoCode",
+            "referral_code": "NOTREAL1",
+        },
+    )
+    assert resp.status_code == 201
+    with app.app_context():
+        user = User.query.filter_by(email="nocode@test.com").first()
+        assert user.referred_by_id is None
+
+
+def test_first_payment_grants_referral_reward_to_both_sides(client):
+    referrer_headers = register(client, email="referrerpay@test.com")
+    referrer = client.get("/auth/me", headers=referrer_headers).get_json()
+
+    referee_headers = register(
+        client,
+        email="refereepay@test.com",
+        referral_code=referrer["referral_code"],
+    )
+
+    resp = client.post(
+        "/payments/subscribe", json={"phone_number": "254712345678", "plan": "monthly"}, headers=referee_headers
+    )
+    # STK push itself fails in tests (no M-Pesa credentials configured), but
+    # a Payment row with a checkout_request_id doesn't get created in that
+    # path - so simulate the callback against a manually created payment.
+    with app.app_context():
+        referee = User.query.filter_by(email="refereepay@test.com").first()
+        payment = Payment(
+            user_id=referee.id, amount=300, phone_number="254712345678",
+            plan="monthly", checkout_request_id="ws_CO_test123",
+        )
+        db.session.add(payment)
+        db.session.commit()
+
+    callback_resp = client.post("/payments/callback", json=_fake_mpesa_callback_body("ws_CO_test123"))
+    assert callback_resp.status_code == 200
+
+    with app.app_context():
+        referrer_after = User.query.filter_by(email="referrerpay@test.com").first()
+        referee_after = User.query.filter_by(email="refereepay@test.com").first()
+        assert referrer_after.subscription_status == "active"
+        assert referrer_after.subscription_expires_at is not None
+        assert referee_after.referral_reward_granted is True
+
+
+def test_referral_reward_not_granted_twice(client):
+    referrer_headers = register(client, email="referrerpay2@test.com")
+    referrer = client.get("/auth/me", headers=referrer_headers).get_json()
+    register(client, email="refereepay2@test.com", referral_code=referrer["referral_code"])
+
+    with app.app_context():
+        referee = User.query.filter_by(email="refereepay2@test.com").first()
+        p1 = Payment(user_id=referee.id, amount=300, phone_number="254712345678", plan="monthly", checkout_request_id="ws_CO_first")
+        db.session.add(p1)
+        db.session.commit()
+
+    client.post("/payments/callback", json=_fake_mpesa_callback_body("ws_CO_first"))
+
+    with app.app_context():
+        referrer_mid = User.query.filter_by(email="referrerpay2@test.com").first()
+        expiry_after_first = referrer_mid.subscription_expires_at
+
+        referee = User.query.filter_by(email="refereepay2@test.com").first()
+        p2 = Payment(user_id=referee.id, amount=300, phone_number="254712345678", plan="monthly", checkout_request_id="ws_CO_second")
+        db.session.add(p2)
+        db.session.commit()
+
+    client.post("/payments/callback", json=_fake_mpesa_callback_body("ws_CO_second"))
+
+    with app.app_context():
+        referrer_final = User.query.filter_by(email="referrerpay2@test.com").first()
+        # A second payment from the same referee should NOT extend the
+        # referrer's subscription again - the reward is one-time.
+        assert referrer_final.subscription_expires_at == expiry_after_first
