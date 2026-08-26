@@ -604,3 +604,63 @@ def test_referral_reward_not_granted_twice(client):
         # A second payment from the same referee should NOT extend the
         # referrer's subscription again - the reward is one-time.
         assert referrer_final.subscription_expires_at == expiry_after_first
+
+
+def test_list_challenges_returns_templates_and_no_active(client):
+    headers = register(client, email="challenger@test.com")
+    resp = client.get("/challenges", headers=headers)
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data["templates"]) == 4
+    assert data["active"] is None
+
+
+def test_join_challenge_creates_active_enrollment(client):
+    headers = register(client, email="joiner@test.com")
+    resp = client.post("/challenges/first-30/join", headers=headers)
+    assert resp.status_code == 201
+    data = resp.get_json()
+    assert data["challenge"]["id"] == "first-30"
+    assert data["workouts_logged"] == 0
+    assert data["progress_pct"] == 0
+
+    listed = client.get("/challenges", headers=headers).get_json()
+    assert listed["active"]["challenge"]["id"] == "first-30"
+
+
+def test_cannot_join_second_challenge_while_one_active(client):
+    headers = register(client, email="doublejoiner@test.com")
+    client.post("/challenges/first-30/join", headers=headers)
+    resp = client.post("/challenges/iron-discipline/join", headers=headers)
+    assert resp.status_code == 400
+
+
+def test_join_unknown_challenge_rejected(client):
+    headers = register(client, email="badjoin@test.com")
+    resp = client.post("/challenges/not-a-real-challenge/join", headers=headers)
+    assert resp.status_code == 404
+
+
+def test_leave_challenge_allows_joining_a_new_one(client):
+    headers = register(client, email="leaver@test.com")
+    client.post("/challenges/first-30/join", headers=headers)
+
+    resp = client.post("/challenges/leave", headers=headers)
+    assert resp.status_code == 204
+
+    resp = client.post("/challenges/iron-discipline/join", headers=headers)
+    assert resp.status_code == 201
+
+
+def test_challenge_progress_reflects_logged_workouts(client):
+    headers = register(client, email="progresser@test.com")
+    client.post("/challenges/14-day-kickstart/join", headers=headers)
+
+    for i in range(3):
+        client.post("/logs", json={"workout_name": f"Session {i}", "duration_minutes": 20}, headers=headers)
+
+    resp = client.get("/challenges", headers=headers)
+    active = resp.get_json()["active"]
+    assert active["workouts_logged"] == 3
+    # target_workouts for 14-day-kickstart is 10
+    assert active["progress_pct"] == 30

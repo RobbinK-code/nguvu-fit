@@ -59,6 +59,7 @@ class User(db.Model):
     workout_logs = db.relationship("WorkoutLog", back_populates="user", cascade="all, delete-orphan")
     payments = db.relationship("Payment", back_populates="user", cascade="all, delete-orphan")
     body_metric_logs = db.relationship("BodyMetricLog", back_populates="user", cascade="all, delete-orphan")
+    challenges = db.relationship("UserChallenge", back_populates="user", cascade="all, delete-orphan")
     referred_users = db.relationship("User", backref=db.backref("referred_by", remote_side="User.id"))
 
     @validates("email")
@@ -364,3 +365,22 @@ class BodyMetricLog(db.Model):
 
     def __repr__(self):
         return f"<BodyMetricLog user={self.user_id} at={self.recorded_at}>"
+
+
+class UserChallenge(db.Model):
+    """A user's enrollment in a challenge (defined in challenges.py, not a
+    database table). Only one active enrollment per user is allowed at a
+    time - `left_at` marks an abandoned challenge so a new one can start."""
+
+    __tablename__ = "user_challenges"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    challenge_id = db.Column(db.String, nullable=False)
+    started_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    left_at = db.Column(db.DateTime)
+
+    user = db.relationship("User", back_populates="challenges")
+
+    def __repr__(self):
+        return f"<UserChallenge user={self.user_id} challenge={self.challenge_id}>"

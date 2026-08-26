@@ -11,8 +11,9 @@ from routes.payments import payments_bp
 from routes.admin import admin_bp
 from routes.equipment import equipment_bp
 from routes.metrics import metrics_bp
+from routes.challenges import challenges_bp
 
-for bp in (auth_bp, profile_bp, exercises_bp, plan_bp, logs_bp, quotes_bp, payments_bp, admin_bp, equipment_bp, metrics_bp):
+for bp in (auth_bp, profile_bp, exercises_bp, plan_bp, logs_bp, quotes_bp, payments_bp, admin_bp, equipment_bp, metrics_bp, challenges_bp):
     app.register_blueprint(bp)
 
 
