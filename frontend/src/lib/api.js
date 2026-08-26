@@ -74,7 +74,14 @@ export const api = {
   getStats: () => request("/logs/stats"),
 
   getMetrics: () => request("/metrics"),
+  getChallenges: () => request("/challenges"),
+  joinChallenge: (id) => request(`/challenges/${id}/join`, { method: "POST" }),
+  leaveChallenge: () => request("/challenges/leave", { method: "POST" }),
   logMetric: (payload) => request("/metrics", { method: "POST", body: payload }),
+
+  getChallenges: () => request("/challenges"),
+  joinChallenge: (id) => request(`/challenges/${id}/join`, { method: "POST" }),
+  leaveChallenge: () => request("/challenges/leave", { method: "POST" }),
   deleteMetric: (id) => request(`/metrics/${id}`, { method: "DELETE" }),
 
   getQuoteOfDay: () => request("/quotes/today"),
